@@ -1,0 +1,607 @@
+---
+globs: *.dart
+description: Linter 警告消除和代码质量强制规范
+---
+
+# Flutter Linter 合规性规范
+
+本规则强制执行严格的 linter 合规性，要求消除所有 linter 警告。
+
+## 零容忍政策
+
+### 命名规范
+
+#### 基本命名规则
+- **Classes**: PascalCase (`UserRepository`, `LoginUseCase`)
+- **Variables/Functions**: camelCase (`userName`, `getUserData`)
+- **Constants**: camelCase (`apiBaseUrl`, `maxRetryCount`)
+- **Private members**: Leading underscore (`_privateField`, `_privateMethod`)
+- **Files**: snake_case (`auth_repository.dart`, `login_usecase.dart`)
+- **Enums**: UPPER_SNAKE_CASE (`USER_STATUS`, `NETWORK_TYPE`, `ERROR_CODE`)
+
+#### 枚举命名规范
+```dart
+// ✅ 正确 - 枚举值使用全大写和下划线
+enum UserStatus {
+  ACTIVE,
+  INACTIVE,
+  PENDING_APPROVAL,
+  SUSPENDED,
+}
+
+enum NetworkType {
+  WIFI,
+  MOBILE_DATA,
+  ETHERNET,
+  BLUETOOTH,
+}
+
+enum ErrorCode {
+  SUCCESS,
+  NETWORK_ERROR,
+  AUTHENTICATION_FAILED,
+  VALIDATION_ERROR,
+}
+
+// ❌ 错误 - 使用驼峰命名
+enum UserStatus {
+  active,           // 错误
+  inactive,         // 错误
+  pendingApproval,  // 错误
+  suspended,        // 错误
+}
+
+// ❌ 错误 - 使用帕斯卡命名
+enum UserStatus {
+  Active,           // 错误
+  Inactive,         // 错误
+  PendingApproval,  // 错误
+  Suspended,        // 错误
+}
+```
+
+### Linter 警告处理
+- **所有 linter 警告必须在代码完成前消除**
+- **不允许任何"轻微"警告的例外**
+- **每个警告都可能是潜在的 bug** 或代码质量问题
+- **在开发过程中将警告视为错误处理**
+
+### 代码质量标准
+- **严格执行 Very Good Analysis 规则**
+- **必须遵循自定义 linter 规则**
+- **代码必须通过 `flutter analyze` 且零警告**
+- **CI/CD 流水线将在出现任何 linter 警告时失败**
+
+## 导入最佳实践
+
+### 相对导入 vs 包导入
+```dart
+// ✅ 正确 - 对本地文件使用相对导入
+import 'app.dart';
+import 'core/di/injection_container.dart';
+import 'core/network/network_info.dart';
+
+// ❌ 错误 - 避免对本地文件使用 package: 导入
+import 'package:flutter_enterprise_scaffold/app.dart';
+import 'package:flutter_enterprise_scaffold/core/di/injection_container.dart';
+```
+
+**为什么相对导入更好：**
+- **项目灵活性**：重命名项目时无需修改导入语句
+- **可维护性**：导入语句中没有硬编码的包名
+- **一致性**：遵循 Flutter 社区最佳实践
+- **重构友好**：IDE 可以轻松更新相对路径
+
+## 常见 Linter 问题修复
+
+### 1. 未使用的导入
+```dart
+// ❌ 错误 - 未使用的导入
+import 'package:flutter/material.dart';
+import 'package:unused_package/unused_package.dart'; // 删除这个
+
+// ✅ 正确 - 只导入使用的包
+import 'package:flutter/material.dart';
+```
+
+### 2. 未使用的变量
+```dart
+// ❌ 错误 - 未使用的变量
+void processData() {
+  final unusedVariable = 'not used';
+  print('Processing...');
+}
+
+// ✅ 正确 - 删除未使用的变量
+void processData() {
+  print('Processing...');
+}
+```
+
+### 3. 缺少返回类型
+```dart
+// ❌ 错误 - 缺少返回类型
+processUser() {
+  return 'user data';
+}
+
+// ✅ 正确 - 明确的返回类型
+String processUser() {
+  return 'user data';
+}
+```
+
+### 4. 不必要的空值检查
+```dart
+// ❌ 错误 - 不必要的空值检查
+String? name;
+if (name != null) {
+  return name.length; // name 已经非空
+}
+
+// ✅ 正确 - 使用空值感知操作符
+String? name;
+return name?.length;
+```
+
+### 5. 缺少文档注释
+```dart
+// ❌ 错误 - 缺少文档注释
+class UserService {
+  Future<User> getUser(String id) async {
+    // 实现
+  }
+}
+
+// ✅ 正确 - 完整的文档注释
+/// 用户操作服务类
+/// 
+/// 提供用户相关的业务逻辑操作，包括用户信息获取、更新等功能
+class UserService {
+  /// 根据唯一标识符获取用户
+  /// 
+  /// 从远程数据源获取用户信息，如果用户不存在则抛出异常
+  /// 
+  /// 参数:
+  /// - [id] 用户的唯一标识符，不能为空
+  /// 
+  /// 返回:
+  /// - [Future<User>] 包含用户信息的 Future 对象
+  /// 
+  /// 异常:
+  /// - [UserNotFoundException] 当用户不存在时抛出
+  /// - [NetworkException] 当网络连接失败时抛出
+  Future<User> getUser(String id) async {
+    // 实现
+  }
+}
+```
+
+### 5.1 注释规范要求
+
+#### 必须添加注释的元素
+- **所有公共类**：包括类的作用、职责和主要功能
+- **所有公共方法**：包括参数说明、返回值、异常情况
+- **所有公共字段**：包括字段的用途和约束
+- **复杂业务逻辑**：超过 5 行的复杂逻辑必须添加注释
+- **算法实现**：任何算法或特殊处理逻辑
+- **配置和常量**：说明配置项的作用和取值范围
+
+#### 注释格式规范
+```dart
+/// 类注释 - 描述类的整体职责
+/// 
+/// 详细说明类的用途、设计模式、使用场景等
+/// 可以包含多行描述
+class ExampleClass {
+  
+  /// 字段注释 - 描述字段的用途和约束
+  /// 
+  /// 如果字段有特殊要求（如非空、格式等），需要明确说明
+  final String exampleField;
+  
+  /// 构造函数注释
+  /// 
+  /// 说明构造函数的用途和参数要求
+  /// 
+  /// 参数:
+  /// - [param1] 参数1的说明
+  /// - [param2] 参数2的说明，可选参数需要说明默认值
+  const ExampleClass({
+    required this.param1,
+    this.param2 = 'default',
+  });
+  
+  /// 方法注释 - 详细说明方法的功能
+  /// 
+  /// 描述方法的主要功能、处理流程、边界条件等
+  /// 
+  /// 参数:
+  /// - [input] 输入参数的说明，包括类型和约束
+  /// 
+  /// 返回:
+  /// - [Future<Result>] 返回值的类型和含义
+  /// 
+  /// 异常:
+  /// - [ValidationException] 当输入无效时抛出
+  /// - [NetworkException] 当网络错误时抛出
+  /// 
+  /// 示例:
+  /// ```dart
+  /// final result = await exampleMethod('valid input');
+  /// ```
+  Future<Result> exampleMethod(String input) async {
+    // 实现逻辑
+  }
+  
+  /// 私有方法也需要注释（如果逻辑复杂）
+  /// 
+  /// 说明方法的内部实现逻辑和设计考虑
+  void _privateMethod() {
+    // 复杂逻辑的实现
+  }
+}
+```
+
+#### 行内注释规范
+```dart
+void complexMethod() {
+  // 步骤1：验证输入参数
+  if (input == null) {
+    throw ArgumentError('Input cannot be null');
+  }
+  
+  // 步骤2：处理业务逻辑
+  // 这里使用特定的算法来处理数据
+  final processedData = _processData(input);
+  
+  // 步骤3：缓存结果以提高性能
+  _cacheResult(processedData);
+}
+```
+
+### 6. 优先使用 const 构造函数
+```dart
+// ❌ 错误 - 未使用 const
+class CustomWidget extends StatelessWidget {
+  final String title;
+  
+  CustomWidget({Key? key, required this.title}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Text(title);
+  }
+}
+
+// ✅ 正确 - 使用 const 构造函数
+class CustomWidget extends StatelessWidget {
+  final String title;
+  
+  const CustomWidget({Key? key, required this.title}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Text(title);
+  }
+}
+```
+
+### 7. 避免使用 print 语句
+```dart
+// ❌ 错误 - 使用 print 进行调试
+void debugFunction() {
+  print('Debug message');
+  print('User data: $userData');
+}
+
+// ✅ 正确 - 使用适当的日志记录
+void debugFunction() {
+  AppLogger.debug('Debug message');
+  AppLogger.debug('User data: $userData');
+}
+```
+
+### 8. 正确的错误处理
+```dart
+// ❌ 错误 - 捕获通用异常
+try {
+  await riskyOperation();
+} catch (e) {
+  print('Error: $e'); // 通用错误处理
+}
+
+// ❌ 错误 - 使用 catch (e) 而不是具体的异常类型
+try {
+  await riskyOperation();
+} catch (e) {
+  AppLogger.error('Error: $e');
+}
+
+// ✅ 正确 - 具体的异常处理
+try {
+  await riskyOperation();
+} on ServerException catch (e) {
+  AppLogger.error('Server error', e);
+  throw ServerFailure(message: e.message, code: e.code);
+} on NetworkException catch (e) {
+  AppLogger.error('Network error', e);
+  throw NetworkFailure(message: e.message, code: e.code);
+} on Exception catch (e) {
+  AppLogger.error('Unexpected error', e);
+  throw UnknownFailure(message: 'Unexpected error: $e');
+} catch (e) {
+  // 只有在确实需要捕获所有类型时才使用通用 catch
+  AppLogger.error('Critical error', e);
+  rethrow;
+}
+```
+
+### 8.1 异常处理规范
+
+#### 必须使用具体的异常类型
+- **优先使用 `on SpecificException catch (e)`** 而不是 `catch (e)`
+- **明确异常类型** 有助于更好的错误处理和调试
+- **提供更精确的错误信息** 给用户和开发者
+
+#### 异常处理层次
+```dart
+try {
+  await operation();
+} on ServerException catch (e) {
+  // 处理服务器错误
+  handleServerError(e);
+} on NetworkException catch (e) {
+  // 处理网络错误
+  handleNetworkError(e);
+} on ValidationException catch (e) {
+  // 处理验证错误
+  handleValidationError(e);
+} on TimeoutException catch (e) {
+  // 处理超时错误
+  handleTimeoutError(e);
+} on Exception catch (e) {
+  // 处理其他已知异常
+  handleGenericException(e);
+} catch (e) {
+  // 只有在确实需要捕获所有类型时才使用
+  // 通常用于记录未知错误并重新抛出
+  AppLogger.critical('Unknown error type: $e');
+  rethrow;
+}
+```
+
+#### 禁止的模式
+```dart
+// ❌ 错误 - 过于宽泛的异常捕获
+try {
+  await operation();
+} catch (e) {
+  // 这样做会隐藏具体的错误类型
+  handleError(e);
+}
+
+// ❌ 错误 - 捕获所有异常但不处理
+try {
+  await operation();
+} catch (e) {
+  // 静默忽略错误
+}
+```
+
+## Linter 命令
+
+### 检查警告
+```bash
+# 检查所有文件的 linter 警告
+flutter analyze
+
+# 检查特定文件
+flutter analyze lib/features/auth/data/repositories/auth_repository_impl.dart
+
+# 详细输出检查
+flutter analyze --verbose
+```
+
+### 修复常见问题
+```bash
+# 自动修复格式问题
+flutter format .
+
+# 自动修复导入问题
+dart fix --apply
+
+# 检查未使用的导入
+dart fix --dry-run
+```
+
+## 提交前检查清单
+
+在提交任何代码前，确保：
+
+1. **运行 `flutter analyze`** - 必须返回零警告
+2. **运行 `flutter format .`** - 代码必须正确格式化
+3. **检查未使用的导入** - 删除所有未使用的导入
+4. **验证 const 构造函数** - 尽可能使用 const
+5. **添加文档注释** - 为所有公共 API 添加文档
+6. **正确处理错误** - 使用具体的异常类型
+7. **删除调试 print** - 使用适当的日志记录
+8. **检查空值安全** - 避免不必要的空值检查
+
+## CI/CD 集成
+
+### GitHub Actions
+```yaml
+- name: 分析代码
+  run: flutter analyze --fatal-infos
+  # 任何 linter 警告都会导致构建失败
+```
+
+### GitLab CI
+```yaml
+analyze:
+  script:
+    - flutter analyze --fatal-infos
+  # 任何 linter 警告都会导致构建失败
+```
+
+## 执行规则
+
+### 开发阶段
+- **IDE 集成**：配置 IDE 突出显示 linter 警告
+- **实时反馈**：编码时修复警告，而不是最后修复
+- **代码审查**：拒绝包含 linter 警告的 PR
+- **结对编程**：立即帮助团队成员修复警告
+
+### 代码审查流程
+- **强制检查**：每个 PR 必须通过 `flutter analyze` 且零警告
+- **无例外**：即使是"轻微"警告也必须修复
+- **文档说明**：在 PR 注释中解释复杂的修复
+- **学习机会**：将警告作为学习机会
+
+### 团队标准
+- **教育培训**：培训团队了解常见 linter 问题
+- **工具使用**：使用 IDE 扩展进行实时警告检测
+- **流程规范**：将 linter 合规性作为完成定义的一部分
+- **文化培养**：培养对干净、无警告代码的自豪感
+
+## 常见警告分类
+
+### 关键（必须立即修复）
+- `unused_import` - 删除未使用的导入
+- `unused_local_variable` - 删除未使用的变量
+- `dead_code` - 删除不可达代码
+- `unnecessary_null_checks` - 修复空值安全问题
+
+### 重要（提交前修复）
+- `missing_return_type` - 添加明确的返回类型
+- `avoid_print` - 替换为适当的日志记录
+- `prefer_const_constructors` - 使用 const 构造函数
+- `missing_documentation` - 添加 API 文档
+
+### 质量（代码审查时修复）
+- `prefer_single_quotes` - 一致使用单引号
+- `prefer_final_locals` - 对局部变量使用 final
+- `sort_child_properties_last` - 对 widget 属性排序
+- `use_key_in_widget_constructors` - 在需要时添加 keys
+
+## 工具和扩展
+
+### VS Code 扩展
+- **Dart**：官方 Dart 扩展
+- **Flutter**：官方 Flutter 扩展
+- **Error Lens**：内联高亮错误和警告
+- **Bracket Pair Colorizer**：更好的代码结构可视化
+
+### Android Studio 插件
+- **Dart**：内置 Dart 支持
+- **Flutter**：内置 Flutter 支持
+- **SonarLint**：额外的代码质量检查
+
+### 命令行工具
+```bash
+# 安装 dart_code_metrics 进行额外分析
+dart pub global activate dart_code_metrics
+
+# 运行综合分析
+metrics lib --reporter=console
+metrics lib --reporter=html --output-directory=metrics_report
+```
+
+## 成功指标
+
+### 团队目标
+- **零警告**：100% 的代码提交零 linter 警告
+- **快速反馈**：检测到警告后 5 分钟内修复
+- **知识共享**：团队成员互相帮助修复警告
+- **持续改进**：定期审查 linter 规则和更新
+
+### 质量指标
+- **干净构建**：CI/CD 流水线从不因 linter 警告失败
+- **代码审查**：没有因 linter 问题被拒绝的 PR
+- **开发体验**：更干净的代码带来更快的开发
+- **可维护性**：更容易的代码维护和调试
+
+记住：**干净的代码不仅仅是功能性的 - 它是关于可维护性、可读性和团队生产力的。每个 linter 警告都是改进代码质量的机会。**
+
+## 多语言国际化规范（强制）
+
+### 总则
+- 任何与用户交互的界面文本、按钮、提示、错误信息、对话框标题/内容、通知、占位符、无障碍标签等，必须使用国际化资源，不得硬编码字符串。
+- 所有用户可见字符串必须存放于 `l10n` ARB 文件（如 `lib/l10n/app_en.arb`, `lib/l10n/app_zh.arb`）。
+- 统一通过 `AppLocalizations.of(context)` 或依赖注入的本地化实例访问文案。
+
+### 允许与禁止
+```dart
+// ❌ 禁止：硬编码用户可见字符串
+Text('登录');
+SnackBar(content: Text('操作成功'));
+AlertDialog(title: Text('错误'), content: Text('网络异常'));
+
+// ✅ 允许：使用本地化
+final l10n = AppLocalizations.of(context)!;
+Text(l10n.login);
+SnackBar(content: Text(l10n.operationSuccess));
+AlertDialog(title: Text(l10n.error), content: Text(l10n.networkError));
+```
+
+### 键命名约定
+- 使用 lowerCamelCase：`login`, `confirm`, `cancel`, `operationSuccess`, `networkError`。
+- 建议分组前缀：`authLoginTitle`, `authLoginButton`, `errorNetworkTimeout`, `settingsThemeDark`。
+
+### 开发流程
+1. 先在 `app_en.arb` 添加键值，再在 `app_zh.arb` 添加对应翻译；保持键一致。
+2. 运行本地化生成（`flutter gen-l10n` 已在项目中配置）。
+3. 代码仅使用 `l10n.<key>`，禁止以常量或字符串替代本地化访问。
+
+### 代码审查/CI
+- 代码审查中出现硬编码用户可见字符串将被拒绝。
+- 可在 CI 中添加简单扫描规则（可选）：匹配 `Text('...')`, `SnackBar(Text('...'))`, `AlertDialog(Text('...'))` 等模式并提示本地化。
+
+### 无障碍（A11y）
+- `Semantics`、`Tooltip`、无障碍标签同样必须使用本地化。
+
+### 错误信息
+- UI 显示的错误文案通过 `ErrorHandler.getErrorMessage(...)` 返回本地化文本或键。
+
+## 注释规范（强制，Dart 文档注释）
+
+### 基本要求
+- 使用 Dart 文档注释语法：面向 API 的注释使用 `///`，行内说明使用 `//`。
+- 注释必须“清晰、准确、通俗易懂且不啰嗦”，避免重复代码本身容易读出的内容。
+- 公开 API（类、枚举、常量、字段、构造函数、方法、getter/setter）必须有文档注释，说明用途、关键参数、返回值与重要注意事项。
+- 对复杂逻辑、边界条件、非直观设计决策，使用简短段落说明“为什么”。
+
+### 构造函数注释（强制）
+- 所有公开构造函数必须添加文档注释，说明用途与各命名参数的含义、默认值与约束。
+- 若构造函数包含可选参数或提供默认值，注释中需明确默认值与适用场景。
+- 工厂构造函数需说明创建策略（例如：单例、缓存、分支返回等）。
+
+### 推荐结构（示例）
+```dart
+/// 通用加载组件
+///
+/// 支持圆环、线性、点状、闪烁等多种加载样式，可选展示提示信息。
+class AppLoadingWidget extends StatelessWidget {
+  /// 加载样式
+  final AppLoadingType type;
+  /// 加载提示文案（可选，建议使用本地化传入）
+  final String? message;
+
+  /// 构造：当 [message] 为空时将不展示提示文案。
+  const AppLoadingWidget({super.key, this.type = AppLoadingType.circular, this.message});
+
+  /// 构建加载组件主体。
+  @override
+  Widget build(BuildContext context) { /* ... */ }
+}
+```
+
+### 禁止与避免
+- 禁止空洞或“套话式”注释（如“这是一个类/方法”）。
+- 禁止冗长堆砌与重复实现细节，避免与代码失去同步。
+- 避免在注释中写业务文案：对用户可见文本请放入本地化 ARB。
+
+### 审查与工具
+- 代码审查时，公开 API 缺注释或注释质量不达标将被拒绝。
+- 建议在 IDE 中启用文档注释模板与 linter 规则（如 public_member_api_docs）。

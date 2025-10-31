@@ -1,0 +1,113 @@
+---
+globs: **/domain/**/*.dart
+description: 领域层模式和业务逻辑规范
+---
+
+# Flutter 领域层模式
+
+本规则适用于领域层目录中的所有文件。
+
+## 领域层结构
+
+### 实体
+- **纯 Dart 类** 包含业务逻辑
+- **无外部依赖** (无 Flutter，无第三方包)
+- **默认不可变**
+- **使用 `Equatable` 进行相等性比较**
+
+### 仓库接口
+- **抽象类** 定义契约
+- **返回类型** 使用 `Either<Failure, T>` 模式
+- **领域层中无实现细节**
+
+### 用例
+- **每个用例单一职责**
+- **业务逻辑** 实现
+- **依赖注入** 用于仓库
+- **错误处理** 使用 Either 模式
+
+## Key Patterns
+
+### Entity Definition
+```dart
+class User extends Equatable {
+  final String id;
+  final String username;
+  final String email;
+  final bool isVerified;
+  
+  const User({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.isVerified,
+  });
+  
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as String,
+      username: json['username'] as String,
+      email: json['email'] as String,
+      isVerified: json['isVerified'] as bool,
+    );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'isVerified': isVerified,
+    };
+  }
+  
+  @override
+  List<Object?> get props => [id, username, email, isVerified];
+}
+```
+
+### Repository Interface
+```dart
+abstract class AuthRepository {
+  Future<Either<Failure, AuthResponse>> login(LoginRequest request);
+  Future<Either<Failure, AuthResponse>> register(RegisterRequest request);
+  Future<Either<Failure, AuthTokens>> refreshToken(String refreshToken);
+  Future<Either<Failure, void>> logout();
+  Future<Either<Failure, User>> getProfile();
+}
+```
+
+### Use Case Implementation
+```dart
+class LoginUseCase {
+  final AuthRepository repository;
+  
+  LoginUseCase(this.repository);
+  
+  Future<Either<Failure, AuthResponse>> call(LoginRequest request) async {
+    // Business logic validation
+    if (request.email.isEmpty || request.password.isEmpty) {
+      return Left(ValidationFailure(
+        message: 'Email and password are required',
+        code: StatusCode.validationError,
+      ));
+    }
+    
+    // Call repository
+    return await repository.login(request);
+  }
+}
+```
+
+## Conventions
+
+1. **Keep entities pure** - no external dependencies
+2. **Use Either pattern** for error handling
+3. **Implement Equatable** for value comparison
+4. **Add business validation** in use cases
+5. **Use abstract classes** for repository interfaces
+6. **Single responsibility** per use case
+7. **Immutable entities** by default
+8. **Clear naming** for business concepts
+9. **Document complex business rules** with comments
+10. **Use StatusCode enum** for error codes

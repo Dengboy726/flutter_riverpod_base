@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+description: Flutter error handling system architecture and conventions
+---
+
+# Flutter Error Handling System
+
+This project uses a comprehensive error handling system with type-safe status codes and structured exception management.
+
+## Core Components
+
+### Status Codes
+- **File**: [status_codes.dart](mdc:lib/core/errors/status_codes.dart)
+- **Type**: `StatusCode` enum with HTTP status codes and custom error codes
+- **Usage**: Always use `StatusCode` enum instead of raw integers
+- **Custom codes**: Negative values (-1 to -8) for custom errors
+- **Helper methods**: `fromValue()`, `isSuccess`, `isRetryable`, `description`
+
+### Exceptions
+- **File**: [exceptions.dart](mdc:lib/core/errors/exceptions.dart)
+- **Pattern**: All exceptions have `StatusCode? code` field (not `int?`)
+- **Types**: `ServerException`, `NetworkException`, `TimeoutException`, `AuthenticationException`, `AuthorizationException`, `ValidationException`, `CacheException`, `FileException`
+- **Dio Integration**: Use `DioExceptionExtension.toAppException()` for automatic conversion
+
+### Failures
+- **File**: [failures.dart](mdc:lib/core/errors/failures.dart)
+- **Pattern**: All failures have `StatusCode? code` field (not `int?`)
+- **Types**: `ServerFailure`, `NetworkFailure`, `TimeoutFailure`, `AuthenticationFailure`, `AuthorizationFailure`, `ValidationFailure`, `CacheFailure`, `FileFailure`, `NotFoundFailure`, `UnknownFailure`
+
+### Error Handler
+- **File**: [error_handler.dart](mdc:lib/core/errors/error_handler.dart)
+- **Purpose**: Convert exceptions to failures using `StatusCode` enum
+- **Methods**: `handleException()`, `handleDioException()`, `handleError()`, `getErrorMessage()`, `isRetryableError()`
+
+## Usage Guidelines
+
+1. **Always use StatusCode enum** instead of raw integers for error codes
+2. **Use StatusCode.fromValue()** when converting HTTP status codes
+3. **Leverage helper methods** like `isRetryable`, `description` for better UX
+4. **Follow the exception → failure pattern** for consistent error handling
+5. **Use appropriate exception types** based on error context (network, server, auth, etc.)
+
+## Example Usage
+
+```dart
+// ✅ Correct - using StatusCode enum
+throw ServerException(
+  message: 'Login failed',
+  code: StatusCode.unauthorized,
+  details: {'userId': userId},
+);
+
+// ❌ Wrong - using raw integer
+throw ServerException(
+  message: 'Login failed',
+  code: 401,
+  details: {'userId': userId},
+);
+```

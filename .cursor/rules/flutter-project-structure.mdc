@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+description: Flutter 项目结构和架构模式
+---
+
+# Flutter 项目结构
+
+这是一个使用清洁架构模式的 Flutter 企业脚手架项目。
+
+## Project Structure
+
+```
+lib/
+├── app.dart                    # Main app configuration
+├── main.dart                   # Entry point
+├── core/                       # Core functionality
+│   ├── constants/              # App constants and API endpoints
+│   ├── di/                     # Dependency injection
+│   ├── errors/                 # Error handling system
+│   ├── l10n/                   # Localization
+│   ├── network/                # Network layer (Dio client)
+│   ├── router/                 # Navigation routing
+│   ├── theme/                  # App theming
+│   ├── utils/                  # Utility functions
+│   └── widgets/                # Reusable widgets
+├── features/                   # Feature modules
+│   └── auth/                   # Authentication feature
+│       ├── data/               # Data layer
+│       │   ├── datasources/    # Remote and local data sources
+│       │   ├── models/         # Data models
+│       │   └── repositories/   # Repository implementations
+│       ├── domain/             # Domain layer
+│       │   ├── entities/       # Business entities
+│       │   ├── repositories/   # Repository interfaces
+│       │   └── usecases/       # Business logic use cases
+│       └── presentation/       # Presentation layer
+│           ├── pages/          # UI pages/screens
+│           ├── widgets/        # Feature-specific widgets
+│           └── providers/      # State management
+└── shared/                     # Shared components
+    ├── data/                   # Shared data layer
+    ├── domain/                 # Shared domain layer
+    └── presentation/           # Shared presentation layer
+```
+
+## Architecture Patterns
+
+### Clean Architecture
+- **Data Layer**: Data sources, models, repositories
+- **Domain Layer**: Entities, repository interfaces, use cases
+- **Presentation Layer**: Pages, widgets, state management
+
+### Dependency Injection
+- **File**: [di.dart](mdc:lib/core/di/di.dart)
+- **Pattern**: Use GetIt for service locator pattern
+- **Registration**: Register all dependencies in DI container
+
+### State Management
+- **Pattern**: Provider pattern for state management
+- **Location**: `presentation/providers/` directories
+
+### Error Handling
+- **System**: Comprehensive error handling with StatusCode enum
+- **Files**: [exceptions.dart](mdc:lib/core/errors/exceptions.dart), [failures.dart](mdc:lib/core/errors/failures.dart), [error_handler.dart](mdc:lib/core/errors/error_handler.dart)
+
+## Key Files
+
+- **Main Entry**: [main.dart](mdc:lib/main.dart)
+- **App Config**: [app.dart](mdc:lib/app.dart)
+- **API Endpoints**: [api_endpoints.dart](mdc:lib/core/constants/api_endpoints.dart)
+- **Dio Client**: [dio_client.dart](mdc:lib/core/network/dio_client.dart)
+- **Router**: [app_router.dart](mdc:lib/core/router/app_router.dart)
+- **Theme**: [app_theme.dart](mdc:lib/core/theme/app_theme.dart)
+
+## Development Guidelines
+
+1. **Follow Clean Architecture** principles
+2. **Use dependency injection** for all services
+3. **Implement proper error handling** with StatusCode enum
+4. **Write unit tests** for business logic
+5. **Use consistent naming** conventions
+6. **Document complex logic** with clear comments

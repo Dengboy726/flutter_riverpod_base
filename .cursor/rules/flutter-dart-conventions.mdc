@@ -1,0 +1,224 @@
+---
+globs: *.dart
+description: Dart 编码规范和最佳实践
+---
+
+# Dart 编码规范
+
+本规则适用于项目中的所有 Dart 文件。
+
+## 基本规范
+
+### 命名规范
+- **类**: PascalCase (`UserRepository`, `LoginUseCase`)
+- **变量/函数**: camelCase (`userName`, `getUserData`)
+- **常量**: camelCase (`apiBaseUrl`, `maxRetryCount`)
+- **私有成员**: 下划线开头 (`_privateField`, `_privateMethod`)
+- **文件**: snake_case (`auth_repository.dart`, `login_usecase.dart`)
+- **枚举**: UPPER_SNAKE_CASE (`USER_STATUS`, `NETWORK_TYPE`, `ERROR_CODE`)
+
+> **注意**: 详细的命名规范和 linter 合规性要求请参考 [flutter-linter-compliance.mdc](mdc:.cursor/rules/flutter-linter-compliance.mdc)
+
+### 代码风格
+- **使用尾随逗号** 以获得更好的格式化
+- **优先使用 const 构造函数** 当可能时
+- **使用 final** 用于不可变变量
+- **避免使用 var** 除非类型很明显
+- **一致使用空安全** 
+
+### 导入规范
+- **顺序**: Dart SDK, Flutter, 第三方包, 本地文件
+- **分组**: 用空行分隔不同组
+- **优先使用相对导入** 对于本地文件
+- **使用 show/hide** 只导入需要的成员
+
+## 错误处理
+
+### StatusCode 使用
+```dart
+// ✅ 正确 - 使用 StatusCode 枚举
+throw ServerException(
+  message: '操作失败',
+  code: StatusCode.INTERNAL_SERVER_ERROR,
+  details: {'context': 'user_creation'},
+);
+
+// ❌ 错误 - 使用原始整数
+throw ServerException(
+  message: '操作失败',
+  code: 500,
+  details: {'context': 'user_creation'},
+);
+```
+
+### Either 模式
+```dart
+// ✅ 正确 - 使用 Either 进行错误处理
+Future<Either<Failure, User>> getUser(String id) async {
+  try {
+    final user = await repository.getUser(id);
+    return Right(user);
+  } on ServerException catch (e) {
+    return Left(ErrorHandler.handleException(e));
+  }
+}
+
+// ❌ 错误 - 在仓库中抛出异常
+Future<User> getUser(String id) async {
+  return await repository.getUser(id); // 可能抛出异常
+}
+```
+
+## Widget 规范
+
+### StatelessWidget
+```dart
+class CustomButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  
+  const CustomButton({
+    Key? key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+  }) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Text(text),
+    );
+  }
+}
+```
+
+### StatefulWidget
+```dart
+class LoginForm extends StatefulWidget {
+  const LoginForm({Key? key}) : super(key: key);
+  
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _emailController,
+            decoration: const InputDecoration(labelText: 'Email'),
+            validator: (value) => value?.isEmpty == true ? 'Required' : null,
+          ),
+          // ... more fields
+        ],
+      ),
+    );
+  }
+}
+```
+
+## 数据层规范
+
+### 模型类
+```dart
+class User extends Equatable {
+  final String id;
+  final String username;
+  final String email;
+  final bool isVerified;
+  
+  const User({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.isVerified,
+  });
+  
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as String,
+      username: json['username'] as String,
+      email: json['email'] as String,
+      isVerified: json['isVerified'] as bool,
+    );
+  }
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'email': email,
+      'isVerified': isVerified,
+    };
+  }
+  
+  @override
+  List<Object?> get props => [id, username, email, isVerified];
+}
+```
+
+### 仓库实现
+```dart
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
+  
+  const AuthRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+  });
+  
+  @override
+  Future<Either<Failure, AuthResponse>> login(LoginRequest request) async {
+    try {
+      final result = await remoteDataSource.login(request);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    } on Exception catch (e) {
+      return Left(ErrorHandler.handleError(e));
+    }
+  }
+}
+```
+
+## 最佳实践
+
+1. **尽可能使用 const 构造函数**
+2. **优先使用组合而不是继承**
+3. **使用有意义的变量名**
+4. **为公共 API 添加文档**
+5. **优雅地处理错误** 使用适当的错误类型
+6. **使用 StatusCode 枚举** 用于所有错误代码
+7. **遵循单一职责原则**
+8. **使用依赖注入** 提高可测试性
+9. **为业务逻辑编写单元测试**
+10. **使用适当的空安全模式**
+11. **避免深层嵌套** 在代码中
+12. **使用早期返回** 减少复杂性
+13. **将相关功能分组** 在一起
+14. **使用一致的格式化** 通过 dart format

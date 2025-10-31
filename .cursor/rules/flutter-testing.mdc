@@ -1,0 +1,195 @@
+---
+globs: **/*_test.dart,**/test/**/*.dart
+description: Flutter 项目测试模式和规范
+---
+
+# Flutter 测试模式
+
+本规则适用于项目中的所有测试文件。
+
+## 测试结构
+
+### 单元测试
+- **位置**: `test/` 目录
+- **覆盖范围**: 业务逻辑、用例、工具
+- **模拟**: 使用 `mockito` 进行依赖模拟
+- **命名**: `*_test.dart` 后缀
+
+### Widget 测试
+- **位置**: `test/` 目录
+- **覆盖范围**: UI 组件、用户交互
+- **测试**: Widget 行为和渲染
+- **命名**: `*_widget_test.dart` 后缀
+
+### 集成测试
+- **位置**: `integration_test/` 目录
+- **覆盖范围**: 端到端用户流程
+- **测试**: 完整的应用功能
+- **命名**: `*_integration_test.dart` 后缀
+
+## Key Patterns
+
+### Unit Test Example
+```dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:dartz/dartz.dart';
+
+import 'package:flutter_enterprise_scaffold/features/auth/domain/entities/login_request.dart';
+import 'package:flutter_enterprise_scaffold/features/auth/domain/repositories/auth_repository.dart';
+import 'package:flutter_enterprise_scaffold/features/auth/domain/usecases/login_usecase.dart';
+import 'package:flutter_enterprise_scaffold/core/errors/failures.dart';
+import 'package:flutter_enterprise_scaffold/core/errors/status_codes.dart';
+
+@GenerateMocks([AuthRepository])
+void main() {
+  late LoginUseCase useCase;
+  late MockAuthRepository mockRepository;
+  
+  setUp(() {
+    mockRepository = MockAuthRepository();
+    useCase = LoginUseCase(mockRepository);
+  });
+  
+  group('LoginUseCase', () {
+    test('should return AuthResponse when login is successful', () async {
+      // Arrange
+      final request = LoginRequest(email: 'test@example.com', password: 'password');
+      final authResponse = AuthResponse(/* ... */);
+      when(mockRepository.login(any))
+          .thenAnswer((_) async => Right(authResponse));
+      
+      // Act
+      final result = await useCase(request);
+      
+      // Assert
+      expect(result, Right(authResponse));
+      verify(mockRepository.login(request));
+    });
+    
+    test('should return ValidationFailure when email is empty', () async {
+      // Arrange
+      final request = LoginRequest(email: '', password: 'password');
+      
+      // Act
+      final result = await useCase(request);
+      
+      // Assert
+      expect(result.isLeft(), true);
+      result.fold(
+        (failure) {
+          expect(failure, isA<ValidationFailure>());
+          expect(failure.code, StatusCode.validationError);
+        },
+        (success) => fail('Should return failure'),
+      );
+    });
+  });
+}
+```
+
+### Widget Test Example
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
+import 'package:flutter_enterprise_scaffold/features/auth/presentation/pages/login_page.dart';
+import 'package:flutter_enterprise_scaffold/features/auth/presentation/providers/auth_provider.dart';
+
+void main() {
+  group('LoginPage', () {
+    testWidgets('should display login form', (WidgetTester tester) async {
+      // Arrange
+      final authProvider = AuthProvider(/* mock dependencies */);
+      
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<AuthProvider>(
+            create: (_) => authProvider,
+            child: const LoginPage(),
+          ),
+        ),
+      );
+      
+      // Assert
+      expect(find.byType(TextField), findsNWidgets(2)); // Email and password
+      expect(find.byType(ElevatedButton), findsOneWidget);
+    });
+    
+    testWidgets('should show loading indicator when loading', (WidgetTester tester) async {
+      // Arrange
+      final authProvider = AuthProvider(/* mock dependencies */);
+      authProvider.setLoading(true);
+      
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<AuthProvider>(
+            create: (_) => authProvider,
+            child: const LoginPage(),
+          ),
+        ),
+      );
+      
+      // Assert
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+  });
+}
+```
+
+### Integration Test Example
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+
+import 'package:flutter_enterprise_scaffold/main.dart' as app;
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  
+  group('Authentication Flow', () {
+    testWidgets('should complete login flow', (WidgetTester tester) async {
+      // Start app
+      app.main();
+      await tester.pumpAndSettle();
+      
+      // Navigate to login page
+      await tester.tap(find.text('Login'));
+      await tester.pumpAndSettle();
+      
+      // Enter credentials
+      await tester.enterText(find.byKey(const Key('email_field')), 'test@example.com');
+      await tester.enterText(find.byKey(const Key('password_field')), 'password');
+      
+      // Tap login button
+      await tester.tap(find.byKey(const Key('login_button')));
+      await tester.pumpAndSettle();
+      
+      // Verify navigation to home page
+      expect(find.text('Welcome'), findsOneWidget);
+    });
+  });
+}
+```
+
+## Conventions
+
+1. **Use descriptive test names** that explain the scenario
+2. **Follow AAA pattern** (Arrange, Act, Assert)
+3. **Mock external dependencies** using mockito
+4. **Test both success and failure cases**
+5. **Use proper test groups** for organization
+6. **Mock StatusCode enum** values appropriately
+7. **Test error handling** with proper failure types
+8. **Use setUp and tearDown** for test preparation
+9. **Test widget interactions** thoroughly
+10. **Verify method calls** with verify()
+11. **Use proper matchers** for assertions
+12. **Test accessibility** features
+13. **Keep tests independent** and isolated
+14. **Use meaningful test data** and scenarios

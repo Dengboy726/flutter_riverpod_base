@@ -1,0 +1,90 @@
+---
+globs: **/data/**/*.dart
+description: 数据层模式和规范
+---
+
+# Flutter 数据层模式
+
+本规则适用于数据层目录中的所有文件。
+
+## 数据层结构
+
+### 数据源
+- **远程数据源**: 使用 Dio 客户端进行 API 调用
+- **本地数据源**: 本地存储、缓存、数据库
+- **模式**: 抽象类 + 实现
+
+### 模型
+- **JSON 序列化**: 使用 `fromJson()` 和 `toJson()` 方法
+- **相等性**: 实现 `Equatable` 进行值比较
+- **验证**: 在模型中添加验证逻辑
+
+### 仓库
+- **接口**: 在领域层定义
+- **实现**: 在数据层实现
+- **错误处理**: 使用 ErrorHandler 将异常转换为失败
+
+## 关键模式
+
+### 数据源实现
+```dart
+abstract class AuthRemoteDataSource {
+  Future<AuthResponse> login(LoginRequest request);
+}
+
+class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+  final DioClient dioClient;
+  
+  @override
+  Future<AuthResponse> login(LoginRequest request) async {
+    try {
+      final response = await dioClient.post<Map<String, dynamic>>(
+        ApiEndpoints.login,
+        data: request.toJson(),
+      );
+      
+      if (response.statusCode == 200) {
+        return AuthResponse.fromJson(response.data!);
+      } else {
+        throw ServerException(
+          message: 'Login failed',
+          code: StatusCode.fromValue(response.statusCode ?? 400),
+        );
+      }
+    } on DioException catch (e) {
+      throw e.toAppException();
+    } catch (e) {
+      throw ServerException(message: 'Login failed: $e');
+    }
+  }
+}
+```
+
+### Repository Implementation
+```dart
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
+  
+  @override
+  Future<Either<Failure, AuthResponse>> login(LoginRequest request) async {
+    try {
+      final result = await remoteDataSource.login(request);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    }
+  }
+}
+```
+
+## Conventions
+
+1. **Always use StatusCode enum** for error codes
+2. **Handle DioException** with `toAppException()` extension
+3. **Use Either<Failure, T>** for repository return types
+4. **Implement proper error handling** with try-catch blocks
+5. **Use dependency injection** for data source dependencies
+6. **Add logging** for debugging and monitoring
+7. **Validate response data** before processing
+8. **Use appropriate HTTP status codes** for different scenarios

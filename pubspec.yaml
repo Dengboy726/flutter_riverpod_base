@@ -1,0 +1,78 @@
+name: flutter_enterprise_scaffold
+description: 企业级 Flutter 脚手架项目
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # 状态管理
+  flutter_riverpod: ^2.5.1
+  flutter_hooks: ^0.20.5
+  hooks_riverpod: ^2.5.1
+
+  # 网络请求
+  dio: ^5.7.0
+  retrofit: ^4.1.0
+  json_annotation: ^4.9.0
+
+  # 本地存储
+  shared_preferences: ^2.3.2
+
+  # 路由管理
+  go_router: ^14.2.7
+
+  # 日志管理
+  logger: ^2.4.0
+
+  # 国际化
+  intl: ^0.20.2
+
+  # 工具类
+  equatable: ^2.0.5
+  freezed_annotation: ^2.4.4
+  json_serializable: ^6.8.0
+
+  # UI 组件
+  flutter_screenutil: ^5.9.3
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+
+  # 其他工具
+  connectivity_plus: ^6.0.5
+  device_info_plus: ^10.1.2
+  package_info_plus: ^8.0.2
+  path_provider: ^2.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # 代码生成
+  build_runner: ^2.4.13
+  freezed: ^2.5.2
+  retrofit_generator: ^8.1.0
+
+  # 测试
+  integration_test:
+    sdk: flutter
+  mockito: ^5.4.4
+
+  # 代码质量
+  flutter_lints: ^4.0.0
+  very_good_analysis: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
