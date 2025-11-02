@@ -1,8 +1,9 @@
-import '../models/login_request.dart';
-import '../models/register_request.dart';
+import '../../../pages/login/models/login_request.dart';
+
 import '../../../core/auth/models/auth_response.dart';
 import '../../../core/auth/models/auth_tokens.dart';
 import '../../../core/auth/models/user.dart';
+import '../../../pages/register/models/register_request.dart';
 
 /// 认证仓库接口
 ///

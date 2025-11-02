@@ -9,64 +9,118 @@ import '../constants/app_constants.dart';
 /// 提供明暗两套主题、统一的组件样式与便捷访问方法。
 class AppTheme {
   const AppTheme._();
-  // 颜色定义
-  /// 主色
-  static const Color primaryColor = Color(0xFF2196F3);
+  // ========== Figma Design System Colors ==========
 
-  /// 主色容器
-  static const Color primaryVariant = Color(0xFF1976D2);
+  // Primary Colors（主色）
+  /// Azure - 主色（用于 CTA、焦点、激活状态、横幅、表格）
+  static const Color primaryColor = Color(0xFF1480EB);
 
-  /// 次要色
-  static const Color secondaryColor = Color(0xFF03DAC6);
+  /// 主色变体（深色）
+  static const Color primaryVariant = Color(0xFF0A4075);
+
+  /// Egg Blue - 次要主色
+  static const Color primarySecondary = Color(0xFF4DCEDE);
+
+  // Secondary Colors（次要色）
+  /// Purple - 紫色次要色
+  static const Color secondaryColor = Color(0xFF675CED);
+
+  /// Pink - 粉色次要色
+  static const Color secondaryPink = Color(0xFFFE2693);
+
+  /// Orange - 橙色次要色
+  static const Color secondaryOrange = Color(0xFFED770A);
+
+  /// Ocean Green - 海洋绿次要色
+  static const Color secondaryOceanGreen = Color(0xFF48D68F);
+
+  /// Android Green - 安卓绿次要色
+  static const Color secondaryAndroidGreen = Color(0xFFB7C62F);
 
   /// 次要色容器
-  static const Color secondaryVariant = Color(0xFF018786);
+  static const Color secondaryVariant = Color(0xFFA49EE7);
+
+  // Neutral Colors（中性色）
+  /// Black - 黑色
+  static const Color black = Color(0xFF1C1C1E);
+
+  /// Grey-1 - 深灰
+  static const Color grey1 = Color(0xFF545454);
+
+  /// Grey-2 - 中深灰
+  static const Color grey2 = Color(0xFF959595);
+
+  /// Grey-3 - 中灰
+  static const Color grey3 = Color(0xFFC2C2C2);
+
+  /// Grey-4 - 浅灰
+  static const Color grey4 = Color(0xFFE5E5E5);
+
+  /// Grey-5 - 极浅灰
+  static const Color grey5 = Color(0xFFF4F4F5);
+
+  /// White - 白色
+  static const Color white = Color(0xFFFBFEFB);
 
   /// 表面颜色（卡片、底部导航等）
-  static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color surfaceColor = white;
 
   /// 背景颜色
-  static const Color backgroundColor = Color(0xFFF5F5F5);
+  static const Color backgroundColor = grey5;
 
-  /// 错误颜色
-  static const Color errorColor = Color(0xFFB00020);
+  // Alert & Status Colors（警告和状态色）
+  /// Rose - 错误/警告颜色
+  static const Color errorColor = Color(0xFFFF0745);
 
-  /// 主色上的文字/图标颜色
-  static const Color onPrimary = Color(0xFFFFFFFF);
+  /// Pigment Green - 成功颜色（实际为 #50AE55，使用正确的绿色）
+  static const Color successColor = Color(0xFF50AE55);
 
-  /// 次要色上的文字/图标颜色
-  static const Color onSecondary = Color(0xFF000000);
+  /// Amber - 警告颜色
+  static const Color warningColor = Color(0xFFFFC107);
 
-  /// 表面上的文字/图标颜色
-  static const Color onSurface = Color(0xFF000000);
+  // Link Colors（链接色）
+  /// Link - 链接颜色
+  static const Color linkColor = Color(0xFF007AFF);
 
-  /// 背景上的文字/图标颜色
-  static const Color onBackground = Color(0xFF000000);
+  /// Visited Link - 已访问链接颜色
+  static const Color visitedLinkColor = Color(0xFFA39DF4);
 
-  /// 错误色上的文字/图标颜色
-  static const Color onError = Color(0xFFFFFFFF);
+  /// 主色上的文字/图标颜色（白色）
+  static const Color onPrimary = white;
 
-  // 深色主题颜色
-  /// 深色主题主色
-  static const Color darkPrimaryColor = Color(0xFF90CAF9);
+  /// 次要色上的文字/图标颜色（黑色）
+  static const Color onSecondary = black;
 
-  /// 深色主题主色容器
-  static const Color darkPrimaryVariant = Color(0xFF1976D2);
+  /// 表面上的文字/图标颜色（黑色）
+  static const Color onSurface = black;
 
-  /// 深色主题次要色
-  static const Color darkSecondaryColor = Color(0xFF03DAC6);
+  /// 背景上的文字/图标颜色（黑色）
+  static const Color onBackground = black;
+
+  /// 错误色上的文字/图标颜色（白色）
+  static const Color onError = white;
+
+  // Dark Theme Colors（深色主题颜色）
+  /// 深色主题主色（使用浅色的 Azure）
+  static const Color darkPrimaryColor = Color(0xFF4E9FF0);
+
+  /// 深色主题主色容器（使用更亮的 Azure）
+  static const Color darkPrimaryVariant = Color(0xFF89BFF5);
+
+  /// 深色主题次要色（使用 Egg Blue）
+  static const Color darkSecondaryColor = primarySecondary;
 
   /// 深色主题次要色容器
-  static const Color darkSecondaryVariant = Color(0xFF03DAC6);
+  static const Color darkSecondaryVariant = Color(0xFF79DAE6);
 
   /// 深色主题表面颜色
-  static const Color darkSurfaceColor = Color(0xFF121212);
+  static const Color darkSurfaceColor = Color(0xFF1C1C1E);
 
   /// 深色主题背景颜色
   static const Color darkBackgroundColor = Color(0xFF000000);
 
-  /// 深色主题错误颜色
-  static const Color darkErrorColor = Color(0xFFCF6679);
+  /// 深色主题错误颜色（使用较柔和的红色）
+  static const Color darkErrorColor = Color(0xFFFF9BB4);
 
   /// 深色主题主色上的文字/图标颜色
   static const Color darkOnPrimary = Color(0xFF000000);
@@ -137,7 +191,7 @@ class AppTheme {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        borderSide: const BorderSide(color: Colors.grey),
+        borderSide: const BorderSide(color: grey3),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -157,19 +211,19 @@ class AppTheme {
       elevation: 8,
       backgroundColor: surfaceColor,
       selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: grey2,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       elevation: 4,
       backgroundColor: primaryColor,
       foregroundColor: onPrimary,
     ),
-    dividerTheme: const DividerThemeData(thickness: 1, color: Colors.grey),
+    dividerTheme: const DividerThemeData(thickness: 1, color: grey4),
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: grey5,
       selectedColor: primaryColor,
       labelStyle: const TextStyle(color: onSurface),
       shape: RoundedRectangleBorder(
@@ -233,7 +287,7 @@ class AppTheme {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        borderSide: const BorderSide(color: Colors.grey),
+        borderSide: const BorderSide(color: grey2),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -253,19 +307,19 @@ class AppTheme {
       elevation: 8,
       backgroundColor: darkSurfaceColor,
       selectedItemColor: darkPrimaryColor,
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: grey3,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       elevation: 4,
       backgroundColor: darkPrimaryColor,
       foregroundColor: darkOnPrimary,
     ),
-    dividerTheme: const DividerThemeData(thickness: 1, color: Colors.grey),
+    dividerTheme: const DividerThemeData(thickness: 1, color: grey2),
     listTileTheme: const ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: Colors.grey[800],
+      backgroundColor: grey1,
       selectedColor: darkPrimaryColor,
       labelStyle: const TextStyle(color: darkOnSurface),
       shape: RoundedRectangleBorder(

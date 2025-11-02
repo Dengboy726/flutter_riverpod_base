@@ -34,10 +34,14 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(languageProvider);
     final router = ref.watch(routerProvider);
 
     return ScreenUtilInit(
-      designSize: const Size(375, 812),
+      designSize: const Size(
+        414,
+        896,
+      ), // iPhone XR/XS Max/11/11 Pro Max dimensions
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) => MaterialApp.router(
@@ -48,7 +52,7 @@ class _MyAppState extends ConsumerState<MyApp> {
         themeMode: themeMode,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        locale: const Locale('zh', 'CN'),
+        locale: locale,
         routerConfig: router,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(

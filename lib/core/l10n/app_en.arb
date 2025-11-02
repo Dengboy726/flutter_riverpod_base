@@ -70,6 +70,17 @@
   "phoneRequired": "Please enter phone number",
   "phoneInvalid": "Invalid phone number format",
   
+  "companyCode": "Company Code",
+  "companyCodeRequired": "Company code is required",
+  "enterCompanyCode": "Enter company code",
+  "emailOrUserId": "Email or User Id",
+  "emailOrPhoneNumber": "Email or phone number",
+  "enterPassword": "Enter password",
+  "enterDetailsToLogin": "Enter your details to get log in to your account",
+  "loginConfirm": "Login confirm",
+  "continueWithThisAccount": "Continue with this account?",
+  "changeUser": "Change User",
+  
   "lightTheme": "Light Theme",
   "darkTheme": "Dark Theme",
   "systemTheme": "Follow System",

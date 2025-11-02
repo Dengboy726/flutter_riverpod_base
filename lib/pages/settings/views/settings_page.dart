@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -17,6 +17,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
     final language = ref.watch(languageProvider);
@@ -24,7 +25,7 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.settings),
+        title: Text(l10n.settings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -36,23 +37,26 @@ class SettingsPage extends ConsumerWidget {
           // 主题设置
           _buildSectionCard(
             context,
-            title: AppStrings.themeSettings,
+            title: l10n.themeSettings,
             children: [
               _buildThemeOption(
                 context,
-                title: AppStrings.lightTheme,
+                l10n: l10n,
+                title: l10n.lightTheme,
                 isSelected: themeMode == ThemeMode.light,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.light),
               ),
               _buildThemeOption(
                 context,
-                title: AppStrings.darkTheme,
+                l10n: l10n,
+                title: l10n.darkTheme,
                 isSelected: themeMode == ThemeMode.dark,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
               ),
               _buildThemeOption(
                 context,
-                title: AppStrings.systemTheme,
+                l10n: l10n,
+                title: l10n.systemTheme,
                 isSelected: themeMode == ThemeMode.system,
                 onTap: () => themeNotifier.setThemeMode(ThemeMode.system),
               ),
@@ -64,18 +68,18 @@ class SettingsPage extends ConsumerWidget {
           // 语言设置
           _buildSectionCard(
             context,
-            title: AppStrings.languageSettings,
+            title: l10n.languageSettings,
             children: [
               _buildLanguageOption(
                 context,
-                title: AppStrings.chinese,
+                title: l10n.chinese,
                 isSelected: language.languageCode == 'zh',
                 onTap: () =>
                     languageNotifier.setLanguage(const Locale('zh', 'CN')),
               ),
               _buildLanguageOption(
                 context,
-                title: AppStrings.english,
+                title: l10n.english,
                 isSelected: language.languageCode == 'en',
                 onTap: () =>
                     languageNotifier.setLanguage(const Locale('en', 'US')),
@@ -88,7 +92,7 @@ class SettingsPage extends ConsumerWidget {
           // 账户设置
           _buildSectionCard(
             context,
-            title: AppStrings.account,
+            title: l10n.account,
             children: [
               _buildSettingsItem(
                 context,
@@ -143,7 +147,7 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.cached,
                 title: '清除缓存',
                 onTap: () {
-                  _showClearCacheDialog(context);
+                  _showClearCacheDialog(context, l10n);
                 },
               ),
             ],
@@ -154,20 +158,20 @@ class SettingsPage extends ConsumerWidget {
           // 关于
           _buildSectionCard(
             context,
-            title: AppStrings.about,
+            title: l10n.about,
             children: [
               _buildSettingsItem(
                 context,
                 icon: Icons.info,
                 title: '应用信息',
                 onTap: () {
-                  _showAppInfoDialog(context);
+                  _showAppInfoDialog(context, l10n);
                 },
               ),
               _buildSettingsItem(
                 context,
                 icon: Icons.feedback,
-                title: AppStrings.feedback,
+                title: l10n.feedback,
                 onTap: () {
                   // TODO(developer): 实现反馈功能
                 },
@@ -175,7 +179,7 @@ class SettingsPage extends ConsumerWidget {
               _buildSettingsItem(
                 context,
                 icon: Icons.help,
-                title: AppStrings.help,
+                title: l10n.help,
                 onTap: () {
                   // TODO(developer): 实现帮助功能
                 },
@@ -213,6 +217,7 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildThemeOption(
     BuildContext context, {
+    required AppLocalizations l10n,
     required String title,
     required bool isSelected,
     required VoidCallback onTap,
@@ -224,8 +229,8 @@ class SettingsPage extends ConsumerWidget {
       child: Row(
         children: [
           Radio<ThemeMode>(
-            value: _getThemeModeFromTitle(title),
-            groupValue: isSelected ? _getThemeModeFromTitle(title) : null,
+            value: _getThemeModeFromTitle(title, l10n),
+            groupValue: isSelected ? _getThemeModeFromTitle(title, l10n) : null,
             onChanged: (value) => onTap(),
           ),
           SizedBox(width: 8.w),
@@ -290,20 +295,21 @@ class SettingsPage extends ConsumerWidget {
     ),
   );
 
-  ThemeMode _getThemeModeFromTitle(String title) {
-    switch (title) {
-      case '浅色主题':
-        return ThemeMode.light;
-      case '深色主题':
-        return ThemeMode.dark;
-      case '跟随系统':
-        return ThemeMode.system;
-      default:
-        return ThemeMode.system;
+  ThemeMode _getThemeModeFromTitle(String title, AppLocalizations l10n) {
+    if (title == l10n.lightTheme) {
+      return ThemeMode.light;
+    } else if (title == l10n.darkTheme) {
+      return ThemeMode.dark;
+    } else if (title == l10n.systemTheme) {
+      return ThemeMode.system;
     }
+    return ThemeMode.system;
   }
 
-  void _showClearCacheDialog(BuildContext context) {
+  void _showClearCacheDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -312,10 +318,10 @@ class SettingsPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text(AppStrings.cancel),
+            child: Text(l10n.cancel),
           ),
           AppButton(
-            text: AppStrings.confirm,
+            text: l10n.confirm,
             onPressed: () {
               // TODO(developer): 实现清除缓存功能
               Navigator.of(context).pop();
@@ -330,7 +336,10 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  void _showAppInfoDialog(BuildContext context) {
+  void _showAppInfoDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -339,7 +348,7 @@ class SettingsPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('应用名称: ${AppStrings.appName}'),
+            Text('应用名称: ${l10n.appName}'),
             SizedBox(height: 8.h),
             const Text('版本: 1.0.0'),
             SizedBox(height: 8.h),
@@ -350,7 +359,7 @@ class SettingsPage extends ConsumerWidget {
         ),
         actions: [
           AppButton(
-            text: AppStrings.ok,
+            text: l10n.ok,
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],

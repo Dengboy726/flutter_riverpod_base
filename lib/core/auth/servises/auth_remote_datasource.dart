@@ -1,16 +1,16 @@
 import 'package:dio/dio.dart';
 
-import '../models/login_request.dart';
-import '../models/register_request.dart';
 import '../../../core/auth/models/auth_response.dart';
 import '../../../core/auth/models/auth_tokens.dart';
 import '../../../core/auth/models/user.dart';
-import '../../../core/storage/local_storage.dart';
 import '../../../core/constants/api_endpoints.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/errors/status_codes.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/logger.dart';
+import '../../../pages/login/models/login_request.dart';
+import '../../../pages/register/models/register_request.dart';
 
 /// 远程数据源接口
 /// 提供了认证相关的远程数据源实现

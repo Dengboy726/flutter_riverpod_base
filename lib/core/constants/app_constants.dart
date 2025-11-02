@@ -1,6 +1,7 @@
 import 'api_endpoints.dart';
 import 'app_config.dart';
 import 'file_constants.dart';
+import 'route_constants.dart';
 import 'storage_keys.dart';
 import 'ui_constants.dart';
 import 'validation_constants.dart';
@@ -9,6 +10,7 @@ import 'validation_constants.dart';
 export 'api_endpoints.dart' show ApiEndpoints;
 export 'app_config.dart' show AppConfig;
 export 'file_constants.dart' show FileConstants;
+export 'route_constants.dart' show RouteConstants;
 export 'storage_keys.dart' show StorageKeys;
 export 'ui_constants.dart' show UIConstants;
 export 'validation_constants.dart' show ValidationConstants;
@@ -23,6 +25,7 @@ export 'validation_constants.dart' show ValidationConstants;
 /// - [UIConstants] - UI 常量
 /// - [ValidationConstants] - 验证常量
 /// - [FileConstants] - 文件常量
+/// - [RouteConstants] - 路由常量
 /// - [ApiEndpoints] - API 端点
 class AppConstants {
   AppConstants._();

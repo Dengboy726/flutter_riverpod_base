@@ -133,6 +133,166 @@ class CustomButton extends StatelessWidget {
 }
 ```
 
+## 组件抽离与代码组织（强制）
+
+### 原则
+
+在设计 UI 页面时，必须将页面拆分为独立的函数组件，每个组件返回一个 Widget，并添加清晰的注释说明。这样可以：
+
+1. **提高可维护性**：每个组件职责单一，便于定位问题
+2. **增强可读性**：函数名清晰表达组件功能
+3. **便于调试**：问题排查时能快速定位到对应组件
+4. **便于复用**：组件可在其他页面复用
+
+### 命名规范
+
+- 使用 `_build` 前缀表示私有构建函数
+- 函数名清晰描述组件功能
+- 使用驼峰命名法
+
+```dart
+// ✅ 正确
+Widget _buildTopImageArea() { ... }
+Widget _buildTitleSection({...}) { ... }
+Widget _buildLoginButton({...}) { ... }
+
+// ❌ 错误
+Widget topImage() { ... }
+Widget buildImage() { ... }
+```
+
+### 注释规范
+
+每个组件函数必须包含：
+
+1. **功能说明**：组件的作用和显示内容
+2. **位置说明**：组件在页面中的位置和布局信息
+3. **参数说明**：所有参数的用途和约束（使用 `@param` 或 `/// 参数:`）
+4. **返回值说明**：返回的 Widget 类型和特点
+5. **特殊说明**：如有特殊逻辑或注意事项
+
+### 示例
+
+```dart
+/// 构建顶部图片区域
+///
+/// 显示登录页面的装饰性图片区域，包含一个半透明的登录图标。
+/// 位于页面顶部，高度为 170.h，图片向上溢出 28.21.h。
+Widget _buildTopImageArea() => Positioned(
+  // ... 实现
+);
+
+/// 构建标题区域
+///
+/// 显示登录页面的主标题和副标题。
+/// 主标题：35sp，Manrope 字体，加粗
+/// 副标题：14sp，Open Sans 字体，灰色
+///
+/// 参数:
+/// - [l10n] 本地化实例
+Widget _buildTitleSection({required AppLocalizations l10n}) => Container(
+  // ... 实现
+);
+
+/// 构建登录按钮
+///
+/// 处理登录逻辑：验证表单 -> 调用登录接口。
+/// 加载状态显示 CircularProgressIndicator，禁用时按钮不可点击。
+///
+/// 参数:
+/// - [formKey] 表单的 GlobalKey，用于表单验证
+/// - [l10n] 本地化实例
+/// - [emailController] 邮箱/用户ID输入框控制器
+/// - [passwordController] 密码输入框控制器
+/// - [authState] 认证状态，用于判断是否加载中
+/// - [authNotifier] 认证通知器，用于调用登录方法
+Widget _buildLoginButton({
+  required GlobalKey<FormState> formKey,
+  required AppLocalizations l10n,
+  required TextEditingController emailController,
+  required TextEditingController passwordController,
+  required AuthState authState,
+  required dynamic authNotifier,
+}) => SizedBox(
+  // ... 实现
+);
+```
+
+### 页面组织结构
+
+页面的 `build` 方法应该保持简洁，主要调用各个 `_build` 函数：
+
+```dart
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  // 1. 状态初始化
+  final formKey = useMemoized(GlobalKey<FormState>.new);
+  // ... 其他状态
+
+  // 2. 业务逻辑处理（如 ref.listen）
+  ref.listen<AuthState>(authNotifierProvider, ...);
+
+  // 3. 返回 UI（调用组件函数）
+  return Scaffold(
+    body: Stack(
+      children: [
+        _buildTopImageArea(),
+        _buildContentCard(...),
+      ],
+    ),
+  );
+}
+```
+
+### 组件拆分标准
+
+以下情况必须拆分为独立函数：
+
+1. **独立的视觉区域**：如顶部图片、标题区域、表单区域、底部按钮等
+2. **复杂的 Widget 树**：超过 10 行的 Widget 嵌套
+3. **重复的逻辑**：多处使用的相同 Widget 结构
+4. **需要独立测试的部分**：便于单元测试的组件
+
+### 禁止的做法
+
+```dart
+// ❌ 错误：直接在 build 中写大量 Widget 树
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Column(
+      children: [
+        Container(...), // 大量嵌套，难以维护
+        Row(...),
+        Stack(...),
+      ],
+    ),
+  );
+}
+
+// ✅ 正确：拆分为函数组件
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: Column(
+      children: [
+        _buildHeader(),
+        _buildContent(),
+        _buildFooter(),
+      ],
+    ),
+  );
+}
+```
+
+### 最佳实践
+
+1. **单一职责**：每个函数只构建一个明确的 UI 部分
+2. **参数明确**：通过参数传递依赖，避免访问外部状态
+3. **注释完整**：确保注释能让他人快速理解组件用途
+4. **保持简洁**：如果函数过长（超过 50 行），考虑进一步拆分
+5. **使用箭头函数**：简单组件可使用箭头函数简化代码
+
 ## Conventions
 
 1. **Use Provider pattern** for state management
@@ -147,3 +307,6 @@ class CustomButton extends StatelessWidget {
 10. **Use proper navigation** patterns
 11. **Implement proper error boundaries** for robust error handling
 12. **Use StatusCode enum** for error handling consistency
+13. **Component extraction is mandatory** - 必须将页面组件抽离为独立函数，并添加完整注释
+14. **Clear function naming** - 使用 `_build` 前缀和描述性函数名
+15. **Comprehensive documentation** - 每个组件函数必须包含功能说明、参数说明和返回值说明

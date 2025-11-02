@@ -210,6 +210,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get phoneInvalid => '手机号格式不正确';
 
   @override
+  String get companyCode => '公司代码';
+
+  @override
+  String get companyCodeRequired => '请输入公司代码';
+
+  @override
+  String get enterCompanyCode => '请输入公司代码';
+
+  @override
+  String get emailOrUserId => '邮箱或用户ID';
+
+  @override
+  String get emailOrPhoneNumber => '邮箱或手机号';
+
+  @override
+  String get enterPassword => '请输入密码';
+
+  @override
+  String get enterDetailsToLogin => '请输入您的详细信息以登录账户';
+
+  @override
+  String get loginConfirm => '登录确认';
+
+  @override
+  String get continueWithThisAccount => '继续使用此账户？';
+
+  @override
+  String get changeUser => '切换用户';
+
+  @override
   String get lightTheme => '浅色主题';
 
   @override

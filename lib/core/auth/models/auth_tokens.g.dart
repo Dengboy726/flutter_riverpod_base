@@ -17,12 +17,12 @@ _$AuthTokensImpl _$$AuthTokensImplFromJson(Map<String, dynamic> json) =>
       tokenType: json['tokenType'] as String? ?? 'Bearer',
     );
 
-Map<String, dynamic> _$$AuthTokensImplToJson(_$AuthTokensImpl instance) =>
-    <String, dynamic>{
-      'accessToken': instance.accessToken,
-      'refreshToken': instance.refreshToken,
-      'expiresAt': instance.expiresAt.toIso8601String(),
-      'refreshTokenExpiresAt':
-          instance.refreshTokenExpiresAt?.toIso8601String(),
-      'tokenType': instance.tokenType,
-    };
+Map<String, dynamic> _$$AuthTokensImplToJson(
+  _$AuthTokensImpl instance,
+) => <String, dynamic>{
+  'accessToken': instance.accessToken,
+  'refreshToken': instance.refreshToken,
+  'expiresAt': instance.expiresAt.toIso8601String(),
+  'refreshTokenExpiresAt': instance.refreshTokenExpiresAt?.toIso8601String(),
+  'tokenType': instance.tokenType,
+};

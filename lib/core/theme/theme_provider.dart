@@ -78,7 +78,7 @@ final languageProvider = StateNotifierProvider<LanguageNotifier, Locale>(
 /// 语言状态通知器
 class LanguageNotifier extends StateNotifier<Locale> {
   /// 创建语言状态通知器并从本地存储加载初始语言
-  LanguageNotifier() : super(const Locale('zh', 'CN')) {
+  LanguageNotifier() : super(const Locale('en', 'US')) {
     _loadLanguage();
   }
 
@@ -89,12 +89,11 @@ class LanguageNotifier extends StateNotifier<Locale> {
     final languageCode = _localStorage.getString(AppConstants.languageKey);
     if (languageCode != null) {
       switch (languageCode) {
-        case 'en':
-          state = const Locale('en', 'US');
-
         case 'zh':
-        default:
           state = const Locale('zh', 'CN');
+        case 'en':
+        default:
+          state = const Locale('en', 'US');
       }
     }
   }

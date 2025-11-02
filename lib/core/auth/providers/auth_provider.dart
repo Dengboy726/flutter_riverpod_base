@@ -6,7 +6,14 @@ import '../../storage/local_storage.dart';
 import '../models/auth_tokens.dart';
 import '../models/user.dart';
 
+part 'auth_provider.freezed.dart';
 
+/// 认证状态提供者
+///
+/// 提供全局的认证状态管理，可以在整个应用中访问和监听认证状态变化。
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
+  (ref) => AuthNotifier(),
+);
 
 /// 认证状态类
 ///
@@ -65,9 +72,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         username: 'test_user',
         firstName: 'Test',
         lastName: 'User',
+        avatar: 'https://pic.qqans.com/up/2024-6/2024625114565689.jpg',
         isEmailVerified: true,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
+        metadata: {
+          'companyName': 'Big O Company',
+          'companyDescription': 'APP Testing',
+        },
       );
 
       final tokens = AuthTokens(
@@ -79,12 +91,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
         ), // 刷新令牌 7 天过期
       );
 
+      // 登录成功后，保存用户数据和 tokens，但不立即设置为已认证
+      // 等待用户在确认页面确认后再设置为已认证
       state = state.copyWith(
-        isAuthenticated: true,
         isInitialized: true,
         isLoading: false,
         user: user,
         tokens: tokens,
+        // 不设置 isAuthenticated，等确认后再设置
+      );
+
+      // 保存 tokens 到本地存储（但不保存用户，等确认后再保存）
+      await LocalStorage.instance.setJson(
+        AppConstants.tokensKey,
+        tokens.toJson(),
       );
     } on Exception catch (e) {
       state = state.copyWith(
@@ -152,8 +172,39 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// 用户登出
   ///
   /// 清除用户认证状态和本地存储的令牌信息。
+  /// 无论是否有网络连接，都会清除本地数据以确保用户可以安全登出。
   Future<void> logout() async {
-    state = const AuthState(isInitialized: true);
+    try {
+      state = state.copyWith(isLoading: true);
+
+      // 清除本地存储的认证数据
+      await LocalStorage.instance.remove(AppConstants.tokensKey);
+      await LocalStorage.instance.remove(AppConstants.userKey);
+
+      // 重置状态为未认证
+      state = const AuthState(
+        isInitialized: true,
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        tokens: null,
+        error: null,
+        errorMessage: null,
+      );
+    } on Exception catch (e) {
+      // 即使清除本地存储失败，也要重置状态
+      final errorString = e.toString();
+      final errorMessage = '退出登录失败: $errorString';
+      state = AuthState(
+        isInitialized: true,
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        tokens: null,
+        error: errorString,
+        errorMessage: errorMessage,
+      );
+    }
   }
 
   /// 刷新认证令牌
@@ -295,18 +346,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void clearError() {
     state = state.copyWith();
   }
+
+  /// 确认登录
+  ///
+  /// 在确认页面用户确认后，将状态设置为已认证，并保存用户信息到本地存储。
+  Future<void> confirmLogin() async {
+    if (state.user != null && state.tokens != null) {
+      // 保存用户信息到本地存储
+      await LocalStorage.instance.setJson(
+        AppConstants.userKey,
+        state.user!.toJson(),
+      );
+
+      // 设置为已认证
+      state = state.copyWith(isAuthenticated: true);
+    }
+  }
+
+  /// 清除用户数据
+  ///
+  /// 切换用户时清除当前用户数据，返回未认证状态。
+  void clearUser() {
+    state = state.copyWith(
+      user: null,
+      tokens: null,
+      isAuthenticated: false,
+      error: null,
+      errorMessage: null,
+    );
+  }
 }
-
-/// 认证状态提供者
-///
-/// 提供全局的认证状态管理，可以在整个应用中访问和监听认证状态变化。
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
-  (ref) => AuthNotifier(),
-);
-
-/// 认证状态流提供者
-///
-/// 提供认证状态的流式访问，用于监听状态变化。
-final authStateStreamProvider = StreamProvider<AuthState>(
-  (ref) => ref.watch(authNotifierProvider.notifier).stream,
-);

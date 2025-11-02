@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/route_constants.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -15,27 +15,13 @@ import '../../../core/auth/providers/auth_provider.dart';
 ///
 /// 提供用户注册功能。
 /// 包含用户名、邮箱、密码、确认密码、姓名、手机号等输入框。
-/// 支持注册按钮，点击后进行注册操作。
-/// 支持登录链接，点击后跳转到登录页面。
-/// 支持错误信息显示。
-/// 支持加载状态显示。
-/// 支持表单验证。
-/// 支持记住我功能。
-/// 支持忘记密码功能。
-/// 支持注册成功后跳转到首页。
-/// 支持注册失败后显示错误信息。
-/// 支持注册成功后显示成功信息。
-/// 支持注册失败后显示错误信息。
 class RegisterPage extends ConsumerWidget {
-  /// 创建注册页面
-  ///
-  /// 参数:
-  /// - [key] 注册页面的键
+  /// 创建注册页面实例
   const RegisterPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -49,18 +35,19 @@ class RegisterPage extends ConsumerWidget {
 
     final authState = ref.watch(authNotifierProvider);
     final authNotifier = ref.read(authNotifierProvider.notifier);
+    final router = ref.read(routerProvider);
 
-    // 监听认证状态变化
-    useEffect(() {
-      if (authState.isAuthenticated) {
-        context.go('/home');
+    // 监听认证状态变化，注册成功后自动跳转
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      final wasNotAuthenticated = previous?.isAuthenticated != true;
+      if (wasNotAuthenticated && next.isAuthenticated) {
+        router.goNamed(RouteConstants.homeName);
       }
-      return null;
-    }, [authState.isAuthenticated]);
+    });
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.register),
+        title: Text(l10n.register),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -76,7 +63,7 @@ class RegisterPage extends ConsumerWidget {
               children: [
                 // 标题
                 Text(
-                  l10n?.createNewAccount ?? '创建新账户',
+                  l10n.createNewAccount,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.getColorScheme(context).primary,
@@ -87,7 +74,7 @@ class RegisterPage extends ConsumerWidget {
                 SizedBox(height: 8.h),
 
                 Text(
-                  l10n?.fillInfoToRegister ?? '请填写以下信息完成注册',
+                  l10n.fillInfoToRegister,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.getColorScheme(context).onSurfaceVariant,
                   ),
@@ -98,20 +85,20 @@ class RegisterPage extends ConsumerWidget {
 
                 // 用户名输入框
                 AppTextField(
-                  label: AppStrings.username,
-                  hint: l10n?.pleaseEnterUsername ?? '请输入用户名',
+                  label: l10n.username,
+                  hint: l10n.pleaseEnterUsername,
                   controller: usernameController,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.person_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppStrings.usernameRequired;
+                      return l10n.usernameRequired;
                     }
                     if (value.length < 3) {
-                      return AppStrings.usernameTooShort;
+                      return l10n.usernameTooShort;
                     }
                     if (value.length > 50) {
-                      return AppStrings.usernameTooLong;
+                      return l10n.usernameTooLong;
                     }
                     return null;
                   },
@@ -121,20 +108,20 @@ class RegisterPage extends ConsumerWidget {
 
                 // 邮箱输入框
                 AppTextField(
-                  label: AppStrings.email,
-                  hint: l10n?.pleaseEnterEmail ?? '请输入邮箱地址',
+                  label: l10n.email,
+                  hint: l10n.pleaseEnterEmail,
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.email_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppStrings.emailRequired;
+                      return l10n.emailRequired;
                     }
                     if (!RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     ).hasMatch(value)) {
-                      return AppStrings.emailInvalid;
+                      return l10n.emailInvalid;
                     }
                     return null;
                   },
@@ -144,21 +131,21 @@ class RegisterPage extends ConsumerWidget {
 
                 // 密码输入框
                 AppTextField(
-                  label: AppStrings.password,
-                  hint: l10n?.pleaseEnterPassword ?? '请输入密码',
+                  label: l10n.password,
+                  hint: l10n.pleaseEnterPassword,
                   controller: passwordController,
                   obscureText: obscurePassword.value,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.lock_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppStrings.passwordRequired;
+                      return l10n.passwordRequired;
                     }
                     if (value.length < 8) {
-                      return AppStrings.passwordTooShort;
+                      return l10n.passwordTooShort;
                     }
                     if (value.length > 128) {
-                      return AppStrings.passwordTooLong;
+                      return l10n.passwordTooLong;
                     }
                     return null;
                   },
@@ -168,18 +155,18 @@ class RegisterPage extends ConsumerWidget {
 
                 // 确认密码输入框
                 AppTextField(
-                  label: AppStrings.confirmPassword,
-                  hint: l10n?.pleaseReEnterPassword ?? '请再次输入密码',
+                  label: l10n.confirmPassword,
+                  hint: l10n.pleaseReEnterPassword,
                   controller: confirmPasswordController,
                   obscureText: obscureConfirmPassword.value,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.lock_outlined),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppStrings.passwordRequired;
+                      return l10n.passwordRequired;
                     }
                     if (value != passwordController.text) {
-                      return AppStrings.passwordMismatch;
+                      return l10n.passwordMismatch;
                     }
                     return null;
                   },
@@ -192,8 +179,8 @@ class RegisterPage extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: AppTextField(
-                        label: l10n?.firstName ?? '名字',
-                        hint: l10n?.pleaseEnterFirstName ?? '请输入名字',
+                        label: l10n.firstName,
+                        hint: l10n.pleaseEnterFirstName,
                         controller: firstNameController,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.person_outline),
@@ -202,8 +189,8 @@ class RegisterPage extends ConsumerWidget {
                     SizedBox(width: 16.w),
                     Expanded(
                       child: AppTextField(
-                        label: l10n?.lastName ?? '姓氏',
-                        hint: l10n?.pleaseEnterLastName ?? '请输入姓氏',
+                        label: l10n.lastName,
+                        hint: l10n.pleaseEnterLastName,
                         controller: lastNameController,
                         textInputAction: TextInputAction.next,
                         prefixIcon: const Icon(Icons.person_outline),
@@ -216,15 +203,15 @@ class RegisterPage extends ConsumerWidget {
 
                 // 手机号输入框（可选）
                 AppTextField(
-                  label: l10n?.phone ?? '手机号',
-                  hint: l10n?.pleaseEnterPhone ?? '请输入手机号',
+                  label: l10n.phone,
+                  hint: l10n.pleaseEnterPhone,
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(Icons.phone_outlined),
                   validator: (value) {
                     if (value != null && value.isNotEmpty) {
                       if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(value)) {
-                        return AppStrings.phoneInvalid;
+                        return l10n.phoneInvalid;
                       }
                     }
                     return null;
@@ -235,7 +222,7 @@ class RegisterPage extends ConsumerWidget {
 
                 // 注册按钮
                 AppButton(
-                  text: AppStrings.register,
+                  text: l10n.register,
                   onPressed: authState.isLoading
                       ? null
                       : () {
@@ -290,14 +277,14 @@ class RegisterPage extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      l10n?.alreadyHaveAccount ?? '已有账户？',
+                      l10n.alreadyHaveAccount,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     TextButton(
                       onPressed: () {
-                        context.go('/login');
+                        context.goNamed(RouteConstants.loginName);
                       },
-                      child: const Text(AppStrings.login),
+                      child: Text(l10n.login),
                     ),
                   ],
                 ),

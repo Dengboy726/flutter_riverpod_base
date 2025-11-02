@@ -70,6 +70,17 @@
   "phoneRequired": "请输入手机号",
   "phoneInvalid": "手机号格式不正确",
   
+  "companyCode": "公司代码",
+  "companyCodeRequired": "请输入公司代码",
+  "enterCompanyCode": "请输入公司代码",
+  "emailOrUserId": "邮箱或用户ID",
+  "emailOrPhoneNumber": "邮箱或手机号",
+  "enterPassword": "请输入密码",
+  "enterDetailsToLogin": "请输入您的详细信息以登录账户",
+  "loginConfirm": "登录确认",
+  "continueWithThisAccount": "继续使用此账户？",
+  "changeUser": "切换用户",
+  
   "lightTheme": "浅色主题",
   "darkTheme": "深色主题",
   "systemTheme": "跟随系统",

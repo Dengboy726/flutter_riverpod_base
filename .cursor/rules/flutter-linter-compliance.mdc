@@ -144,7 +144,54 @@ String? name;
 return name?.length;
 ```
 
-### 5. 缺少文档注释
+### 5. 优先使用表达式函数体
+
+当一个函数只包含一个 `return` 语句时，应该使用表达式函数体（箭头函数）而不是块函数体。这可以使代码更简洁、易读。
+
+```dart
+// ❌ 错误 - 不必要的块函数体
+Widget _buildTitle() {
+  return Text('Title');
+}
+
+ValueListenableBuilder<String?>(
+  valueListenable: errorNotifier,
+  builder: (context, errorText, _) {
+    return SizedBox(
+      height: 16.h,
+      child: errorText != null ? Text(errorText) : SizedBox.shrink(),
+    );
+  },
+)
+
+// ✅ 正确 - 使用表达式函数体
+Widget _buildTitle() => Text('Title');
+
+ValueListenableBuilder<String?>(
+  valueListenable: errorNotifier,
+  builder: (context, errorText, _) => SizedBox(
+    height: 16.h,
+    child: errorText != null
+        ? Padding(
+            padding: EdgeInsets.only(left: 16.w, top: 4.h),
+            child: Text(errorText),
+          )
+        : const SizedBox.shrink(),
+  ),
+)
+```
+
+**何时使用表达式函数体：**
+- 函数体只包含一个 `return` 语句
+- 函数体简单且易读
+- 不会降低代码可读性
+
+**何时保持块函数体：**
+- 函数体包含多条语句
+- 函数体包含复杂的控制流（if-else、循环等）
+- 使用块函数体可以提高可读性
+
+### 6. 缺少文档注释
 ```dart
 // ❌ 错误 - 缺少文档注释
 class UserService {
@@ -260,7 +307,7 @@ void complexMethod() {
 }
 ```
 
-### 6. 优先使用 const 构造函数
+### 7. 优先使用 const 构造函数
 ```dart
 // ❌ 错误 - 未使用 const
 class CustomWidget extends StatelessWidget {
@@ -287,7 +334,7 @@ class CustomWidget extends StatelessWidget {
 }
 ```
 
-### 7. 避免使用 print 语句
+### 8. 避免使用 print 语句
 ```dart
 // ❌ 错误 - 使用 print 进行调试
 void debugFunction() {
@@ -302,7 +349,7 @@ void debugFunction() {
 }
 ```
 
-### 8. 正确的错误处理
+### 9. 正确的错误处理
 ```dart
 // ❌ 错误 - 捕获通用异常
 try {
@@ -337,7 +384,7 @@ try {
 }
 ```
 
-### 8.1 异常处理规范
+### 9.1 异常处理规范
 
 #### 必须使用具体的异常类型
 - **优先使用 `on SpecificException catch (e)`** 而不是 `catch (e)`
@@ -482,6 +529,7 @@ analyze:
 ### 质量（代码审查时修复）
 - `prefer_single_quotes` - 一致使用单引号
 - `prefer_final_locals` - 对局部变量使用 final
+- `prefer_expression_function_bodies` - 优先使用表达式函数体（箭头函数）
 - `sort_child_properties_last` - 对 widget 属性排序
 - `use_key_in_widget_constructors` - 在需要时添加 keys
 

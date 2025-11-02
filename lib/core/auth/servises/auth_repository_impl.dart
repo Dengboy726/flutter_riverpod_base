@@ -1,11 +1,11 @@
-import '../models/login_request.dart';
-import '../models/register_request.dart';
 import '../../../core/auth/models/auth_response.dart';
 import '../../../core/auth/models/auth_tokens.dart';
 import '../../../core/auth/models/user.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../core/network/network_info.dart';
 import '../../../core/utils/logger.dart';
+import '../../../pages/login/models/login_request.dart';
+import '../../../pages/register/models/register_request.dart';
 import 'auth_local_datasource.dart';
 import 'auth_remote_datasource.dart';
 import 'auth_repository.dart';

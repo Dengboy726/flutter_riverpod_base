@@ -500,6 +500,66 @@ abstract class AppLocalizations {
   /// **'手机号格式不正确'**
   String get phoneInvalid;
 
+  /// No description provided for @companyCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'公司代码'**
+  String get companyCode;
+
+  /// No description provided for @companyCodeRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入公司代码'**
+  String get companyCodeRequired;
+
+  /// No description provided for @enterCompanyCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入公司代码'**
+  String get enterCompanyCode;
+
+  /// No description provided for @emailOrUserId.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱或用户ID'**
+  String get emailOrUserId;
+
+  /// No description provided for @emailOrPhoneNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'邮箱或手机号'**
+  String get emailOrPhoneNumber;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入密码'**
+  String get enterPassword;
+
+  /// No description provided for @enterDetailsToLogin.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入您的详细信息以登录账户'**
+  String get enterDetailsToLogin;
+
+  /// No description provided for @loginConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'登录确认'**
+  String get loginConfirm;
+
+  /// No description provided for @continueWithThisAccount.
+  ///
+  /// In zh, this message translates to:
+  /// **'继续使用此账户？'**
+  String get continueWithThisAccount;
+
+  /// No description provided for @changeUser.
+  ///
+  /// In zh, this message translates to:
+  /// **'切换用户'**
+  String get changeUser;
+
   /// No description provided for @lightTheme.
   ///
   /// In zh, this message translates to:

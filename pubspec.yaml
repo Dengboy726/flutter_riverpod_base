@@ -20,7 +20,6 @@ dependencies:
 
   # 网络请求
   dio: ^5.7.0
-  retrofit: ^4.1.0
   json_annotation: ^4.9.0
 
   # 本地存储
@@ -38,17 +37,13 @@ dependencies:
   # 工具类
   equatable: ^2.0.5
   freezed_annotation: ^2.4.4
-  json_serializable: ^6.8.0
 
   # UI 组件
   flutter_screenutil: ^5.9.3
   cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
 
   # 其他工具
   connectivity_plus: ^6.0.5
-  device_info_plus: ^10.1.2
-  package_info_plus: ^8.0.2
   path_provider: ^2.1.4
 
 dev_dependencies:
@@ -57,13 +52,12 @@ dev_dependencies:
 
   # 代码生成
   build_runner: ^2.4.13
-  freezed: ^2.5.2
-  retrofit_generator: ^8.1.0
+  freezed: ^2.5.8
+  json_serializable: ^6.8.0
 
   # 测试
   integration_test:
     sdk: flutter
-  mockito: ^5.4.4
 
   # 代码质量
   flutter_lints: ^4.0.0
@@ -74,5 +68,10 @@ flutter:
   generate: true
 
   assets:
-    - assets/images/
+    - assets/images/splash/SplashScreen.png
+    - assets/images/splash/DumbChat.png
+    - assets/images/home/D.png
+    - assets/images/home/bell.png
+    - assets/images/home/search.png
+    - assets/images/home/menu.png
     - assets/icons/

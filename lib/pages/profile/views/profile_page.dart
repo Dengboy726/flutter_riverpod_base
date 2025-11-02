@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/app_strings.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -57,6 +57,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authNotifierProvider);
     final authNotifier = ref.read(authNotifierProvider.notifier);
 
@@ -69,7 +70,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         actions: [
           AppButton(
-            text: AppStrings.save,
+            text: l10n.save,
             onPressed: _saveProfile,
             type: AppButtonType.text,
             size: AppButtonSize.small,
@@ -128,7 +129,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               // 用户名
               AppTextField(
-                label: AppStrings.username,
+                label: l10n.username,
                 controller: _usernameController,
                 enabled: false, // 用户名通常不可修改
                 prefixIcon: const Icon(Icons.person_outlined),
@@ -138,7 +139,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               // 邮箱
               AppTextField(
-                label: AppStrings.email,
+                label: l10n.email,
                 controller: _emailController,
                 enabled: false, // 邮箱通常不可修改
                 keyboardType: TextInputType.emailAddress,
@@ -152,7 +153,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 children: [
                   Expanded(
                     child: AppTextField(
-                      label: '名字',
+                      label: l10n.firstName,
                       controller: _firstNameController,
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
@@ -160,7 +161,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   SizedBox(width: 16.w),
                   Expanded(
                     child: AppTextField(
-                      label: '姓氏',
+                      label: l10n.lastName,
                       controller: _lastNameController,
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
@@ -172,14 +173,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               // 手机号
               AppTextField(
-                label: AppStrings.phone,
+                label: l10n.phone,
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 prefixIcon: const Icon(Icons.phone_outlined),
                 validator: (value) {
                   if (value != null && value.isNotEmpty) {
                     if (!RegExp(r'^1[3-9]\d{9}$').hasMatch(value)) {
-                      return AppStrings.phoneInvalid;
+                      return l10n.phoneInvalid;
                     }
                   }
                   return null;
@@ -253,7 +254,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               AppButton(
                 text: '修改密码',
                 onPressed: () {
-                  _showChangePasswordDialog(context);
+                  _showChangePasswordDialog(context, l10n);
                 },
                 type: AppButtonType.outline,
                 isFullWidth: true,
@@ -264,7 +265,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               AppButton(
                 text: '删除账户',
                 onPressed: () {
-                  _showDeleteAccountDialog(context, authNotifier);
+                  _showDeleteAccountDialog(context, authNotifier, l10n);
                 },
                 type: AppButtonType.danger,
                 isFullWidth: true,
@@ -334,7 +335,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
-  void _showChangePasswordDialog(BuildContext context) {
+  void _showChangePasswordDialog(BuildContext context, AppLocalizations l10n) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -342,7 +343,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         content: const Text('修改密码功能正在开发中...'),
         actions: [
           AppButton(
-            text: AppStrings.ok,
+            text: l10n.ok,
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -353,6 +354,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showDeleteAccountDialog(
     BuildContext context,
     AuthNotifier authNotifier,
+    AppLocalizations l10n,
   ) {
     showDialog<void>(
       context: context,
@@ -362,7 +364,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text(AppStrings.cancel),
+            child: Text(l10n.cancel),
           ),
           AppButton(
             text: '删除',

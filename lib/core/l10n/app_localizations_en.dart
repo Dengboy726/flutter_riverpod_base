@@ -214,6 +214,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneInvalid => 'Invalid phone number format';
 
   @override
+  String get companyCode => 'Company Code';
+
+  @override
+  String get companyCodeRequired => 'Company code is required';
+
+  @override
+  String get enterCompanyCode => 'Enter company code';
+
+  @override
+  String get emailOrUserId => 'Email or User Id';
+
+  @override
+  String get emailOrPhoneNumber => 'Email or phone number';
+
+  @override
+  String get enterPassword => 'Enter password';
+
+  @override
+  String get enterDetailsToLogin =>
+      'Enter your details to get log in to your account';
+
+  @override
+  String get loginConfirm => 'Login confirm';
+
+  @override
+  String get continueWithThisAccount => 'Continue with this account?';
+
+  @override
+  String get changeUser => 'Change User';
+
+  @override
   String get lightTheme => 'Light Theme';
 
   @override

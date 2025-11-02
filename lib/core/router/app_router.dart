@@ -3,52 +3,61 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../pages/home/views/home_page.dart';
+import '../../pages/login/views/login_confirm_page.dart';
 import '../../pages/login/views/login_page.dart';
 import '../../pages/profile/views/profile_page.dart';
 import '../../pages/register/views/register_page.dart';
 import '../../pages/settings/views/settings_page.dart';
 import '../../pages/splash/views/splash_page.dart';
+import '../constants/route_constants.dart';
 import '../l10n/app_localizations.dart';
 
 /// 路由提供者
 final routerProvider = Provider<GoRouter>(
   (ref) => GoRouter(
-    initialLocation: '/splash',
+    initialLocation: RouteConstants.splash,
     debugLogDiagnostics: true,
     routes: [
       // 启动页
       GoRoute(
-        path: '/splash',
-        name: 'splash',
+        path: RouteConstants.splash,
+        name: RouteConstants.splashName,
         builder: (context, state) => const SplashPage(),
       ),
 
       // 认证相关路由
       GoRoute(
-        path: '/login',
-        name: 'login',
+        path: RouteConstants.login,
+        name: RouteConstants.loginName,
         builder: (context, state) => const LoginPage(),
+        routes: [
+          GoRoute(
+            path: 'confirm',
+            name: RouteConstants.loginConfirmName,
+            builder: (context, state) => const LoginConfirmPage(),
+          ),
+        ],
       ),
       GoRoute(
-        path: '/register',
-        name: 'register',
+        path: RouteConstants.register,
+        name: RouteConstants.registerName,
         builder: (context, state) => const RegisterPage(),
       ),
 
       // 主应用路由
       GoRoute(
-        path: '/home',
-        name: 'home',
+        path: RouteConstants.home,
+        name: RouteConstants.homeName,
         builder: (context, state) => const HomePage(),
         routes: [
           GoRoute(
             path: 'profile',
-            name: 'profile',
+            name: RouteConstants.profileName,
             builder: (context, state) => const ProfilePage(),
           ),
           GoRoute(
             path: 'settings',
-            name: 'settings',
+            name: RouteConstants.settingsName,
             builder: (context, state) => const SettingsPage(),
           ),
         ],
@@ -75,7 +84,7 @@ final routerProvider = Provider<GoRouter>(
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => context.go('/home'),
+                onPressed: () => context.go(RouteConstants.home),
                 child: Text(l10n?.backToHome ?? '返回首页'),
               ),
             ],
