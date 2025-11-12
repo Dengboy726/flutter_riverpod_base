@@ -11,6 +11,11 @@ import '../../../../core/widgets/home_drawer.dart';
 import '../../../core/utils/logger.dart' show AppLogger;
 import '../widget/limited_tag_wrap.dart';
 
+/// 选中的标签筛选 Provider
+///
+/// 用于管理标签筛选弹窗中选中的标签列表。
+final selectedTagsProvider = StateProvider<Set<String>>((ref) => <String>{});
+
 /// 首页 - 聊天列表页面
 ///
 /// 显示所有聊天会话的列表，包含频道选择、筛选功能和聊天项。
@@ -60,10 +65,10 @@ class HomePage extends ConsumerWidget {
               Builder(builder: _buildChannelSelector),
 
               // 筛选按钮栏
-              Builder(builder: _buildFilterButtons),
+              Builder(builder: (context) => _buildFilterButtons(context, ref)),
 
               // 聊天列表
-              Expanded(child: _buildChatList()),
+              Expanded(child: _buildChatList(ref)),
             ],
           ),
         ],
@@ -309,7 +314,7 @@ class HomePage extends ConsumerWidget {
   /// 构建筛选按钮栏
   ///
   /// 显示 Status、Tag、Assignee 三个筛选按钮。
-  Widget _buildFilterButtons(BuildContext context) => Container(
+  Widget _buildFilterButtons(BuildContext context, WidgetRef ref) => Container(
     width: double.infinity,
     height: 60.h,
     padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -323,11 +328,11 @@ class HomePage extends ConsumerWidget {
     ),
     child: Row(
       children: [
-        _buildFilterButton(context: context, label: 'Status', isSelected: true),
+        _buildFilterButton(context: context, label: 'Status', isSelected: true, ref: ref),
         SizedBox(width: 10.w),
-        _buildFilterButton(context: context, label: 'Tag'),
+        _buildFilterButton(context: context, label: 'Tag', ref: ref),
         SizedBox(width: 10.w),
-        _buildFilterButton(context: context, label: 'Assignee'),
+        _buildFilterButton(context: context, label: 'Assignee', ref: ref),
       ],
     ),
   );
@@ -340,9 +345,10 @@ class HomePage extends ConsumerWidget {
     required BuildContext context,
     required String label,
     bool isSelected = false,
+    required WidgetRef ref,
   }) => Builder(
     builder: (buttonContext) => GestureDetector(
-      onTap: () => _showFilterDropdown(buttonContext, label),
+      onTap: () => _showFilterDropdown(buttonContext, label, ref),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         decoration: ShapeDecoration(
@@ -390,10 +396,10 @@ class HomePage extends ConsumerWidget {
   ///
   /// 根据筛选类型显示对应的下拉菜单选项或弹窗。
   /// 对于 Tag 筛选，显示弹窗；其他类型显示下拉菜单。
-  void _showFilterDropdown(BuildContext context, String filterType) {
+  void _showFilterDropdown(BuildContext context, String filterType, WidgetRef ref) {
     // Tag 筛选显示弹窗
     if (filterType == 'Tag') {
-      _showTagFilterDialog(context);
+      _showTagFilterDialog(context, ref);
       return;
     }
 
@@ -544,11 +550,17 @@ class HomePage extends ConsumerWidget {
   /// 显示标签筛选弹窗
   ///
   /// 显示标签选择对话框，包含已选标签区域、标签选择区域和筛选按钮。
-  void _showTagFilterDialog(BuildContext context) {
+  void _showTagFilterDialog(BuildContext context, WidgetRef ref) {
+    final selectedTags = ref.read(selectedTagsProvider);
     showDialog<void>(
       context: context,
       barrierColor: Colors.transparent,
-      builder: (dialogContext) => const _TagFilterDialog(),
+      builder: (dialogContext) => _TagFilterDialog(
+        initialSelectedTags: selectedTags,
+        onFilterApplied: (tags) {
+          ref.read(selectedTagsProvider.notifier).state = tags;
+        },
+      ),
     );
   }
 
@@ -631,86 +643,117 @@ class HomePage extends ConsumerWidget {
 
   /// 构建聊天列表
   ///
-  /// 显示所有聊天会话的列表。
-  Widget _buildChatList() => SingleChildScrollView(
-    child: Column(
-      children: [
-        _buildChatItem(
-          avatarColor: const Color(0xFFC4DFFA),
-          name: 'Archived',
-          time: '5m',
-          message: 'All the archived conversation from WhatsApp',
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarUrl: 'https://placehold.co/52x52',
-          name: 'Renaldy 1984',
-          time: '1h',
-          message: 'Start a new conversation',
-          unreadCount: 3,
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarColor: const Color(0xFFC4DFFA),
-          avatarInitial: 'S',
-          name: 'Samuel Morganisa',
-          time: 'Fri',
-          message: 'How much this product?',
-          unreadCount: 99,
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarUrl: 'https://placehold.co/52x52',
-          name: 'Zahra Hussein',
-          time: '1w',
-          unreadCount: 100,
-          message:
-              'That works, i was actually planning to get a smoothie anyways👍 ',
-          tags: [
-            TagItem(text: 'Flutter', color: Colors.blue, filled: true),
-            TagItem(text: 'Dart', color: Colors.orange, filled: false),
-            TagItem(text: 'Riverpod', color: Colors.green, filled: true),
-            TagItem(text: 'Hooks', color: Colors.purple, filled: false),
-            TagItem(text: 'Firebase', color: Colors.red, filled: true),
-            TagItem(text: 'BLoC', color: Colors.cyan, filled: false),
-            TagItem(text: 'GetX', color: Colors.indigo, filled: true),
-            TagItem(text: 'Flutter', color: Colors.blue, filled: true),
-            TagItem(text: 'Dart', color: Colors.orange, filled: false),
-            TagItem(text: 'Riverpod', color: Colors.green, filled: true),
-            TagItem(text: 'Hooks', color: Colors.purple, filled: false),
-            TagItem(text: 'Firebase', color: Colors.red, filled: true),
-            TagItem(text: 'BLoC', color: Colors.cyan, filled: false),
-            TagItem(text: 'GetX', color: Colors.indigo, filled: true),
+  /// 显示所有聊天会话的列表，根据选中的标签进行筛选。
+  Widget _buildChatList(WidgetRef ref) {
+    final selectedTags = ref.watch(selectedTagsProvider);
+    
+    // 定义所有聊天项数据
+    final chatItems = [
+      _ChatItemData(
+        avatarColor: const Color(0xFFC4DFFA),
+        name: 'Archived',
+        time: '5m',
+        message: 'All the archived conversation from WhatsApp',
+        tags: null,
+      ),
+      _ChatItemData(
+        avatarUrl: 'https://placehold.co/52x52',
+        name: 'Renaldy 1984',
+        time: '1h',
+        message: 'Start a new conversation',
+        unreadCount: 3,
+        tags: null,
+      ),
+      _ChatItemData(
+        avatarColor: const Color(0xFFC4DFFA),
+        avatarInitial: 'S',
+        name: 'Samuel Morganisa',
+        time: 'Fri',
+        message: 'How much this product?',
+        unreadCount: 99,
+        tags: null,
+      ),
+      _ChatItemData(
+        avatarUrl: 'https://placehold.co/52x52',
+        name: 'Zahra Hussein',
+        time: '1w',
+        unreadCount: 100,
+        message: 'That works, i was actually planning to get a smoothie anyways👍 ',
+        tags: [
+          TagItem(text: 'Flutter', color: Colors.blue, filled: true),
+          TagItem(text: 'Dart', color: Colors.orange, filled: false),
+          TagItem(text: 'Riverpod', color: Colors.green, filled: true),
+          TagItem(text: 'Hooks', color: Colors.purple, filled: false),
+          TagItem(text: 'Firebase', color: Colors.red, filled: true),
+          TagItem(text: 'BLoC', color: Colors.cyan, filled: false),
+          TagItem(text: 'GetX', color: Colors.indigo, filled: true),
+          TagItem(text: 'Flutter', color: Colors.blue, filled: true),
+          TagItem(text: 'Dart', color: Colors.orange, filled: false),
+          TagItem(text: 'Riverpod', color: Colors.green, filled: true),
+          TagItem(text: 'Hooks', color: Colors.purple, filled: false),
+          TagItem(text: 'Firebase', color: Colors.red, filled: true),
+          TagItem(text: 'BLoC', color: Colors.cyan, filled: false),
+          TagItem(text: 'GetX', color: Colors.indigo, filled: true),
+        ],
+      ),
+      _ChatItemData(
+        avatarUrl: 'https://placehold.co/52x52',
+        name: 'Valentina Díaz',
+        time: '1w',
+        message: 'Typing...',
+        tags: [
+          TagItem(text: 'New', color: const Color(0xFFFFC107)),
+          TagItem(text: 'no package', color: const Color(0xFF808080)),
+        ],
+      ),
+      _ChatItemData(
+        avatarUrl: 'https://placehold.co/52x52',
+        name: 'Neeraj Das',
+        time: '07/29/25',
+        message: 'Where is the office?',
+        tags: null,
+      ),
+      _ChatItemData(
+        avatarUrl: 'https://placehold.co/52x52',
+        name: 'Anastasia Murphy',
+        time: '07/29/25',
+        message: 'Start a new conversation',
+        tags: null,
+      ),
+    ];
+
+    // 根据选中的标签过滤聊天项
+    final filteredItems = selectedTags.isEmpty
+        ? chatItems
+        : chatItems.where((item) {
+            if (item.tags == null || item.tags!.isEmpty) {
+              return false; // 如果没有标签，且选中了标签，则不显示
+            }
+            // 检查聊天项的标签是否包含任何选中的标签
+            final itemTagTexts = item.tags!.map((tag) => tag.text).toSet();
+            return itemTagTexts.intersection(selectedTags).isNotEmpty;
+          }).toList();
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          for (int i = 0; i < filteredItems.length; i++) ...[
+            _buildChatItem(
+              avatarUrl: filteredItems[i].avatarUrl,
+              avatarColor: filteredItems[i].avatarColor,
+              avatarInitial: filteredItems[i].avatarInitial,
+              name: filteredItems[i].name,
+              time: filteredItems[i].time,
+              message: filteredItems[i].message,
+              unreadCount: filteredItems[i].unreadCount,
+              tags: filteredItems[i].tags,
+            ),
+            if (i < filteredItems.length - 1) _buildDivider(),
           ],
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarUrl: 'https://placehold.co/52x52',
-          name: 'Valentina Díaz',
-          time: '1w',
-          message: 'Typing...',
-          tags: [
-            TagItem(text: 'New', color: const Color(0xFFFFC107)),
-            TagItem(text: 'no package', color: const Color(0xFF808080)),
-          ],
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarUrl: 'https://placehold.co/52x52',
-          name: 'Neeraj Das',
-          time: '07/29/25',
-          message: 'Where is the office?',
-        ),
-        _buildDivider(),
-        _buildChatItem(
-          avatarUrl: 'https://placehold.co/52x52',
-          name: 'Anastasia Murphy',
-          time: '07/29/25',
-          message: 'Start a new conversation',
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
   /// 构建聊天项
   ///
@@ -975,29 +1018,45 @@ class HomePage extends ConsumerWidget {
   );
 }
 
-/// 聊天标签数据类
+/// 聊天项数据类
 ///
-/// 用于表示聊天项的标签信息。
-class _ChatTag {
-  /// 创建聊天标签实例
-  const _ChatTag({
-    required this.text,
-    required this.color,
-    this.isOutline = false,
-    this.isFilled = false,
+/// 用于表示聊天项的所有信息，用于筛选功能。
+class _ChatItemData {
+  /// 创建聊天项数据实例
+  const _ChatItemData({
+    this.avatarUrl,
+    this.avatarColor,
+    this.avatarInitial,
+    required this.name,
+    required this.time,
+    required this.message,
+    this.unreadCount,
+    this.tags,
   });
 
-  /// 标签文本
-  final String text;
+  /// 头像 URL
+  final String? avatarUrl;
 
-  /// 标签颜色
-  final Color color;
+  /// 头像颜色
+  final Color? avatarColor;
 
-  /// 是否为轮廓样式
-  final bool isOutline;
+  /// 头像首字母
+  final String? avatarInitial;
 
-  /// 是否为填充样式（半透明填充）
-  final bool isFilled;
+  /// 名称
+  final String name;
+
+  /// 时间
+  final String time;
+
+  /// 消息
+  final String message;
+
+  /// 未读数
+  final int? unreadCount;
+
+  /// 标签列表
+  final List<TagItem>? tags;
 }
 
 /// 标签筛选弹窗
@@ -1005,7 +1064,16 @@ class _ChatTag {
 /// 显示标签选择对话框，包含标题、已选标签、标签选择区域和筛选按钮。
 class _TagFilterDialog extends StatefulWidget {
   /// 创建标签筛选弹窗实例
-  const _TagFilterDialog();
+  const _TagFilterDialog({
+    required this.initialSelectedTags,
+    required this.onFilterApplied,
+  });
+
+  /// 初始选中的标签
+  final Set<String> initialSelectedTags;
+
+  /// 筛选应用回调
+  final void Function(Set<String> tags) onFilterApplied;
 
   @override
   State<_TagFilterDialog> createState() => _TagFilterDialogState();
@@ -1014,7 +1082,7 @@ class _TagFilterDialog extends StatefulWidget {
 /// 标签筛选弹窗状态
 class _TagFilterDialogState extends State<_TagFilterDialog> {
   /// 已选中的标签列表
-  final Set<String> _selectedTags = {};
+  late Set<String> _selectedTags;
 
   /// 滚动控制器
   final ScrollController _scrollController = ScrollController();
@@ -1025,6 +1093,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
   @override
   void initState() {
     super.initState();
+    _selectedTags = Set<String>.from(widget.initialSelectedTags);
     _scrollController.addListener(_updateScrollbar);
     // 延迟检查，等待布局完成
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1508,7 +1577,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
     height: 48.h,
     child: ElevatedButton(
       onPressed: () {
-        // TODO(developer): 处理筛选逻辑
+        widget.onFilterApplied(_selectedTags);
         Navigator.of(context).pop();
       },
       style: ElevatedButton.styleFrom(

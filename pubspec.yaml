@@ -70,6 +70,7 @@ flutter:
   assets:
     - assets/images/splash/SplashScreen.png
     - assets/images/splash/DumbChat.png
+    - assets/images/IllustratorDumb.png
     - assets/images/home/D.png
     - assets/images/home/bell.png
     - assets/images/home/search.png
